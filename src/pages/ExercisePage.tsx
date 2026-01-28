@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { getExerciseById, exercises as allExercises, getCourseById } from '../data/exercises';
+import { useProgressStore } from '../store/progressStore';
 import type { TestCase } from '../types';
 import './ExercisePage.css';
 
@@ -45,6 +46,9 @@ const ExercisePage = () => {
     }, [exercise]);
 
     const course = exercise ? getCourseById(exercise.courseId) : null;
+
+    // Progress tracking
+    const { completeExercise } = useProgressStore();
 
     const [code, setCode] = useState('');
     const [output, setOutput] = useState('');
@@ -139,6 +143,10 @@ sys.stdout = StringIO()
 
                 if (results.every((r: { passed: boolean }) => r.passed)) {
                     setIsComplete(true);
+                    // Record completion in progress store
+                    if (exercise) {
+                        completeExercise(exercise.id, exercise.courseId, exercise.points, code);
+                    }
                 }
             } else {
                 // Fallback: Basic check when Pyodide isn't loaded

@@ -13,9 +13,10 @@ import {
     Award
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useProgressStore } from '../store/progressStore';
 import './DashboardPage.css';
 
-// Mock data for demonstration
+// Mock user data for display name (auth)
 const mockUser = {
     id: '1',
     email: 'john@example.com',
@@ -24,29 +25,30 @@ const mockUser = {
     role: 'student' as const,
     createdAt: '2024-01-01',
     stats: {
-        totalPoints: 2450,
-        exercisesCompleted: 47,
-        currentStreak: 12,
-        longestStreak: 21,
-        rank: 156,
+        totalPoints: 0,
+        exercisesCompleted: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        rank: 0,
         badges: []
     }
 };
 
 const recentExercises = [
-    { id: '1', title: 'List Comprehensions', course: 'Python Basics', progress: 80, difficulty: 'intermediate' },
-    { id: '2', title: 'Dictionary Methods', course: 'Python Basics', progress: 100, difficulty: 'beginner' },
-    { id: '3', title: 'Class Inheritance', course: 'OOP in Python', progress: 45, difficulty: 'intermediate' },
-    { id: '4', title: 'Error Handling', course: 'Python Basics', progress: 0, difficulty: 'beginner' },
+    { id: 'hello-world', title: 'Hello World', course: 'Python Fundamentals', progress: 0, difficulty: 'beginner' },
+    { id: 'variables-and-types', title: 'Variables and Types', course: 'Python Fundamentals', progress: 0, difficulty: 'beginner' },
+    { id: 'basic-arithmetic', title: 'Basic Arithmetic', course: 'Python Fundamentals', progress: 0, difficulty: 'beginner' },
+    { id: 'string-formatting', title: 'String Formatting', course: 'Python Fundamentals', progress: 0, difficulty: 'beginner' },
 ];
 
 const recommendedCourses = [
-    { id: '1', title: 'Data Structures', description: 'Master arrays, linked lists, and trees', progress: 0, exercises: 24 },
-    { id: '2', title: 'Web APIs with FastAPI', description: 'Build modern APIs with Python', progress: 0, exercises: 18 },
+    { id: 'python-fundamentals', title: 'Python Fundamentals', description: 'Start your Python journey with the basics', progress: 0, exercises: 5 },
+    { id: 'data-structures', title: 'Data Structures', description: 'Master lists, dictionaries, and more', progress: 0, exercises: 5 },
 ];
 
 const DashboardPage = () => {
     const { user, login, isAuthenticated } = useAuthStore();
+    const { totalXP, currentStreak, getTotalExercisesCompleted, getUnlockedAchievements } = useProgressStore();
 
     // Auto-login for demo
     useEffect(() => {
@@ -56,6 +58,11 @@ const DashboardPage = () => {
     }, [isAuthenticated, login]);
 
     const displayUser = user || mockUser;
+    const exercisesCompleted = getTotalExercisesCompleted();
+    const unlockedAchievements = getUnlockedAchievements();
+
+    // Calculate rank based on XP (simple formula for demo)
+    const rank = totalXP > 0 ? Math.max(1, 500 - Math.floor(totalXP / 10)) : 500;
 
     return (
         <div className="dashboard-page animate-fade-in">
@@ -80,10 +87,10 @@ const DashboardPage = () => {
                         <Flame />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-value">{displayUser.stats.currentStreak}</span>
+                        <span className="stat-value">{currentStreak}</span>
                         <span className="stat-label">Day Streak</span>
                     </div>
-                    <div className="stat-badge">🔥 On Fire!</div>
+                    {currentStreak >= 3 && <div className="stat-badge">🔥 On Fire!</div>}
                 </div>
 
                 <div className="stat-card points">
@@ -91,13 +98,15 @@ const DashboardPage = () => {
                         <Trophy />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-value">{displayUser.stats.totalPoints.toLocaleString()}</span>
-                        <span className="stat-label">Total Points</span>
+                        <span className="stat-value">{totalXP.toLocaleString()}</span>
+                        <span className="stat-label">Total XP</span>
                     </div>
-                    <div className="stat-trend positive">
-                        <TrendingUp size={14} />
-                        +120 this week
-                    </div>
+                    {totalXP > 0 && (
+                        <div className="stat-trend positive">
+                            <TrendingUp size={14} />
+                            Earning XP!
+                        </div>
+                    )}
                 </div>
 
                 <div className="stat-card completed">
@@ -105,10 +114,12 @@ const DashboardPage = () => {
                         <CheckCircle2 />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-value">{displayUser.stats.exercisesCompleted}</span>
+                        <span className="stat-value">{exercisesCompleted}</span>
                         <span className="stat-label">Exercises Done</span>
                     </div>
-                    <div className="stat-subtext">3 this week</div>
+                    {unlockedAchievements.length > 0 && (
+                        <div className="stat-subtext">{unlockedAchievements.length} badges earned</div>
+                    )}
                 </div>
 
                 <div className="stat-card rank">
@@ -116,13 +127,15 @@ const DashboardPage = () => {
                         <Award />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-value">#{displayUser.stats.rank}</span>
+                        <span className="stat-value">#{rank}</span>
                         <span className="stat-label">Global Rank</span>
                     </div>
-                    <div className="stat-trend positive">
-                        <TrendingUp size={14} />
-                        Up 12 places
-                    </div>
+                    {totalXP > 0 && (
+                        <div className="stat-trend positive">
+                            <TrendingUp size={14} />
+                            Keep learning!
+                        </div>
+                    )}
                 </div>
             </section>
 
