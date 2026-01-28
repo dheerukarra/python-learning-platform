@@ -14,11 +14,13 @@ import {
     Terminal,
     BookOpen,
     Zap,
-    ArrowLeft
+    ArrowLeft,
+    LogIn
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { getExerciseById, exercises as allExercises, getCourseById } from '../data/exercises';
 import { useProgressStore } from '../store/progressStore';
+import { useAuthStore } from '../store/authStore';
 import type { TestCase } from '../types';
 import './ExercisePage.css';
 
@@ -30,6 +32,7 @@ const difficultyColors: Record<string, string> = {
 
 const ExercisePage = () => {
     const { exerciseId } = useParams();
+    const { isAuthenticated } = useAuthStore();
 
     // Get exercise data
     const exercise = useMemo(() => {
@@ -191,6 +194,22 @@ sys.stdout = StringIO()
             setCode(exercise.starterCode);
         }
     };
+
+    // Auth check - require login to solve exercises
+    if (!isAuthenticated) {
+        return (
+            <div className="exercise-page">
+                <div className="exercise-not-found">
+                    <h2>Sign In Required</h2>
+                    <p>Please sign in to start solving exercises and track your progress.</p>
+                    <Link to="/login" className="btn btn-primary">
+                        <LogIn size={18} />
+                        Sign In to Continue
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     // Loading or not found state
     if (!exercise) {

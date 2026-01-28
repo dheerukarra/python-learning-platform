@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Flame,
@@ -10,29 +9,12 @@ import {
     ArrowRight,
     Target,
     Zap,
-    Award
+    Award,
+    LogIn
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useProgressStore } from '../store/progressStore';
 import './DashboardPage.css';
-
-// Mock user data for display name (auth)
-const mockUser = {
-    id: '1',
-    email: 'john@example.com',
-    username: 'johndoe',
-    displayName: 'John Doe',
-    role: 'student' as const,
-    createdAt: '2024-01-01',
-    stats: {
-        totalPoints: 0,
-        exercisesCompleted: 0,
-        currentStreak: 0,
-        longestStreak: 0,
-        rank: 0,
-        badges: []
-    }
-};
 
 const recentExercises = [
     { id: 'hello-world', title: 'Hello World', course: 'Python Fundamentals', progress: 0, difficulty: 'beginner' },
@@ -47,29 +29,41 @@ const recommendedCourses = [
 ];
 
 const DashboardPage = () => {
-    const { user, login, isAuthenticated } = useAuthStore();
+    const { user, isAuthenticated } = useAuthStore();
     const { totalXP, currentStreak, getTotalExercisesCompleted, getUnlockedAchievements } = useProgressStore();
 
-    // Auto-login for demo
-    useEffect(() => {
-        if (!isAuthenticated) {
-            login(mockUser, 'demo-token');
-        }
-    }, [isAuthenticated, login]);
-
-    const displayUser = user || mockUser;
     const exercisesCompleted = getTotalExercisesCompleted();
     const unlockedAchievements = getUnlockedAchievements();
 
     // Calculate rank based on XP (simple formula for demo)
     const rank = totalXP > 0 ? Math.max(1, 500 - Math.floor(totalXP / 10)) : 500;
 
+    // Show sign-in prompt if not authenticated
+    if (!isAuthenticated) {
+        return (
+            <div className="dashboard-page animate-fade-in">
+                <section className="dashboard-welcome">
+                    <div className="welcome-content">
+                        <h1 className="welcome-title">Welcome to PyLearn! 🐍</h1>
+                        <p className="welcome-subtitle">Sign in to track your progress and earn achievements.</p>
+                    </div>
+                    <div className="welcome-actions">
+                        <Link to="/login" className="btn btn-primary">
+                            <LogIn size={18} />
+                            Sign In to Start Learning
+                        </Link>
+                    </div>
+                </section>
+            </div>
+        );
+    }
+
     return (
         <div className="dashboard-page animate-fade-in">
             {/* Welcome Section */}
             <section className="dashboard-welcome">
                 <div className="welcome-content">
-                    <h1 className="welcome-title">Welcome back, {displayUser.displayName}! 👋</h1>
+                    <h1 className="welcome-title">Welcome back, {user?.displayName || 'Learner'}! 👋</h1>
                     <p className="welcome-subtitle">Ready to continue your Python journey? You're doing great!</p>
                 </div>
                 <div className="welcome-actions">

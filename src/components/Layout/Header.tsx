@@ -13,10 +13,12 @@ import {
 } from 'lucide-react';
 import { useThemeStore } from '../../store/themeStore';
 import { useAuthStore } from '../../store/authStore';
+import { useProgressStore } from '../../store/progressStore';
 
 const Header = () => {
     const { theme, toggleTheme } = useThemeStore();
     const { user, isAuthenticated, logout } = useAuthStore();
+    const { currentStreak } = useProgressStore();
 
     return (
         <header className="layout-header">
@@ -61,10 +63,10 @@ const Header = () => {
                     />
                 </div>
 
-                {isAuthenticated && user && (
+                {isAuthenticated && currentStreak > 0 && (
                     <div className="streak-badge">
                         <Flame />
-                        <span>{user.stats.currentStreak} day streak</span>
+                        <span>{currentStreak} day streak</span>
                     </div>
                 )}
 
