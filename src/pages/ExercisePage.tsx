@@ -72,7 +72,7 @@ print(squared_evens)`,
 };
 
 const ExercisePage = () => {
-    const { exerciseId } = useParams();
+    const { exerciseId: _exerciseId } = useParams();
     const [code, setCode] = useState(mockExercise.starterCode);
     const [output, setOutput] = useState('');
     const [isRunning, setIsRunning] = useState(false);
