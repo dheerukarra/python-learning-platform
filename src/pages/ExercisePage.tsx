@@ -199,13 +199,40 @@ sys.stdout = StringIO()
     if (!isAuthenticated) {
         return (
             <div className="exercise-page">
-                <div className="exercise-not-found">
-                    <h2>Sign In Required</h2>
-                    <p>Please sign in to start solving exercises and track your progress.</p>
-                    <Link to="/login" className="btn btn-primary">
-                        <LogIn size={18} />
-                        Sign In to Continue
-                    </Link>
+                <div className="auth-required-container">
+                    <div className="auth-required-card">
+                        <div className="auth-required-icon">
+                            <div className="icon-ring"></div>
+                            <div className="icon-ring delay-1"></div>
+                            <div className="icon-ring delay-2"></div>
+                            <span className="lock-emoji">🔐</span>
+                        </div>
+                        <h2 className="auth-required-title">Sign In Required</h2>
+                        <p className="auth-required-text">
+                            Please sign in to start solving exercises and track your progress.
+                        </p>
+                        <div className="auth-required-features">
+                            <div className="feature-item">
+                                <span className="feature-icon">📊</span>
+                                <span>Track your progress</span>
+                            </div>
+                            <div className="feature-item">
+                                <span className="feature-icon">🏆</span>
+                                <span>Earn achievements</span>
+                            </div>
+                            <div className="feature-item">
+                                <span className="feature-icon">🔥</span>
+                                <span>Build streaks</span>
+                            </div>
+                        </div>
+                        <Link to="/login" className="btn btn-primary auth-required-btn">
+                            <LogIn size={18} />
+                            Sign In to Continue
+                        </Link>
+                        <p className="auth-required-signup">
+                            Don't have an account? <Link to="/register">Sign up for free</Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         );
