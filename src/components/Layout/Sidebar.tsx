@@ -8,7 +8,8 @@ import {
     Database,
     Cloud,
     Zap,
-    Award
+    Award,
+    Settings
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -72,6 +73,13 @@ const Sidebar = () => {
                         <Award />
                         <span>Achievements</span>
                     </NavLink>
+                    <NavLink
+                        to="/settings"
+                        className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <Settings />
+                        <span>Settings</span>
+                    </NavLink>
                 </nav>
             </div>
 
@@ -115,7 +123,7 @@ const Sidebar = () => {
                 <p className="sidebar-promo-text">
                     Complete today's challenge to earn bonus points and keep your streak alive!
                 </p>
-                <a href="/exercise/daily" className="sidebar-promo-btn">
+                <a href="/daily-challenge" className="sidebar-promo-btn">
                     Start Challenge →
                 </a>
             </div>

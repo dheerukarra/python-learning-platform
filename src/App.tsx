@@ -12,7 +12,10 @@ import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import ExercisePage from './pages/ExercisePage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import AchievementsPage from './pages/AchievementsPage';
+import DailyChallengePage from './pages/DailyChallengePage';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
@@ -33,7 +36,10 @@ function App() {
                     <Route path="courses/:courseId" element={<CourseDetailPage />} />
                     <Route path="exercise/:exerciseId" element={<ExercisePage />} />
                     <Route path="leaderboard" element={<LeaderboardPage />} />
+                    <Route path="achievements" element={<AchievementsPage />} />
+                    <Route path="daily-challenge" element={<DailyChallengePage />} />
                     <Route path="profile" element={<ProfilePage />} />
+                    <Route path="settings" element={<SettingsPage />} />
                 </Route>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
@@ -43,4 +49,5 @@ function App() {
 }
 
 export default App;
+
 
