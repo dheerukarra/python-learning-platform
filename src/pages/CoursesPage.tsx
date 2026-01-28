@@ -12,95 +12,14 @@ import {
     Lock,
     ArrowRight
 } from 'lucide-react';
+import { courses as courseData } from '../data/exercises';
 import './CoursesPage.css';
 
-// Mock course data
-const courses = [
-    {
-        id: '1',
-        title: 'Python Fundamentals',
-        description: 'Learn the basics of Python programming including variables, data types, and control flow.',
-        track: 'development',
-        difficulty: 'beginner',
-        thumbnail: '🐍',
-        duration: '8 hours',
-        exerciseCount: 24,
-        completedCount: 18,
-        progress: 75,
-        isLocked: false,
-        learners: 2450
-    },
-    {
-        id: '2',
-        title: 'Object-Oriented Programming',
-        description: 'Master classes, inheritance, polymorphism, and other OOP concepts in Python.',
-        track: 'development',
-        difficulty: 'intermediate',
-        thumbnail: '🏗️',
-        duration: '12 hours',
-        exerciseCount: 32,
-        completedCount: 8,
-        progress: 25,
-        isLocked: false,
-        learners: 1890
-    },
-    {
-        id: '3',
-        title: 'Data Analysis with Pandas',
-        description: 'Learn to analyze and manipulate data using the powerful Pandas library.',
-        track: 'datascience',
-        difficulty: 'intermediate',
-        thumbnail: '📊',
-        duration: '10 hours',
-        exerciseCount: 28,
-        completedCount: 0,
-        progress: 0,
-        isLocked: false,
-        learners: 3200
-    },
-    {
-        id: '4',
-        title: 'Machine Learning Basics',
-        description: 'Introduction to machine learning with scikit-learn. Build your first ML models.',
-        track: 'datascience',
-        difficulty: 'advanced',
-        thumbnail: '🤖',
-        duration: '15 hours',
-        exerciseCount: 36,
-        completedCount: 0,
-        progress: 0,
-        isLocked: true,
-        learners: 1560
-    },
-    {
-        id: '5',
-        title: 'Web Development with FastAPI',
-        description: 'Build modern, fast APIs with Python using the FastAPI framework.',
-        track: 'development',
-        difficulty: 'intermediate',
-        thumbnail: '⚡',
-        duration: '14 hours',
-        exerciseCount: 30,
-        completedCount: 0,
-        progress: 0,
-        isLocked: false,
-        learners: 2100
-    },
-    {
-        id: '6',
-        title: 'Python Automation',
-        description: 'Automate tasks, web scraping, and file handling with Python scripts.',
-        track: 'devops',
-        difficulty: 'beginner',
-        thumbnail: '🔧',
-        duration: '6 hours',
-        exerciseCount: 18,
-        completedCount: 0,
-        progress: 0,
-        isLocked: false,
-        learners: 4500
-    }
-];
+// Add learners count to courses
+const courses = courseData.map(course => ({
+    ...course,
+    learners: Math.floor(Math.random() * 3000) + 1500
+}));
 
 const trackIcons: Record<string, typeof Code2> = {
     development: Code2,

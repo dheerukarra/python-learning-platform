@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import {
     Play,
     RotateCcw,
@@ -13,67 +13,40 @@ import {
     EyeOff,
     Terminal,
     BookOpen,
-    Zap
+    Zap,
+    ArrowLeft
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
+import { getExerciseById, exercises as allExercises, getCourseById } from '../data/exercises';
+import type { TestCase } from '../types';
 import './ExercisePage.css';
 
-// Mock exercise data
-const mockExercise = {
-    id: '1',
-    courseId: '1',
-    title: 'List Comprehensions',
-    description: 'Learn to create lists using Python list comprehensions.',
-    instructions: `# List Comprehensions
-
-List comprehensions provide a concise way to create lists in Python.
-
-## Basic Syntax
-\`\`\`python
-[expression for item in iterable]
-\`\`\`
-
-## Your Task
-Create a list comprehension that:
-1. Takes the numbers 1-10
-2. Returns only the even numbers
-3. Squares each even number
-
-Expected output: \`[4, 16, 36, 64, 100]\`
-
-## Hints
-- Use \`range(1, 11)\` to get numbers 1-10
-- Use \`x % 2 == 0\` to check if a number is even
-- Use \`x ** 2\` to square a number`,
-    difficulty: 'intermediate' as const,
-    points: 25,
-    starterCode: `# Create a list of squared even numbers from 1 to 10
-# Your code here:
-
-squared_evens = []
-
-print(squared_evens)`,
-    solution: `# Create a list of squared even numbers from 1 to 10
-squared_evens = [x ** 2 for x in range(1, 11) if x % 2 == 0]
-
-print(squared_evens)`,
-    testCases: [
-        { id: '1', input: '', expectedOutput: '[4, 16, 36, 64, 100]', description: 'Correct output', isHidden: false },
-    ],
-    hints: [
-        'Use range(1, 11) to generate numbers 1 through 10',
-        'Add a condition after the for clause to filter even numbers',
-        'Apply the square operation in the expression part'
-    ],
-    tags: ['lists', 'comprehensions', 'basics'],
-    order: 5,
-    estimatedTime: '10 min',
-    status: 'available' as const
+const difficultyColors: Record<string, string> = {
+    beginner: 'badge-success',
+    intermediate: 'badge-warning',
+    advanced: 'badge-error'
 };
 
 const ExercisePage = () => {
-    const { exerciseId: _exerciseId } = useParams();
-    const [code, setCode] = useState(mockExercise.starterCode);
+    const { exerciseId } = useParams();
+
+    // Get exercise data
+    const exercise = useMemo(() => {
+        if (!exerciseId) return null;
+        return getExerciseById(exerciseId);
+    }, [exerciseId]);
+
+    // Get next exercise for navigation
+    const nextExercise = useMemo(() => {
+        if (!exercise) return null;
+        const courseExercises = allExercises.filter(e => e.courseId === exercise.courseId);
+        const currentIndex = courseExercises.findIndex(e => e.id === exercise.id);
+        return courseExercises[currentIndex + 1] || null;
+    }, [exercise]);
+
+    const course = exercise ? getCourseById(exercise.courseId) : null;
+
+    const [code, setCode] = useState('');
     const [output, setOutput] = useState('');
     const [isRunning, setIsRunning] = useState(false);
     const [testResults, setTestResults] = useState<{ passed: boolean; message: string }[]>([]);
@@ -83,6 +56,19 @@ const ExercisePage = () => {
     const [isComplete, setIsComplete] = useState(false);
     const [pyodideReady, setPyodideReady] = useState(false);
     const [pyodide, setPyodide] = useState<unknown>(null);
+
+    // Reset state when exercise changes
+    useEffect(() => {
+        if (exercise) {
+            setCode(exercise.starterCode);
+            setOutput('');
+            setTestResults([]);
+            setShowHints(false);
+            setCurrentHint(0);
+            setShowSolution(false);
+            setIsComplete(false);
+        }
+    }, [exercise]);
 
     // Load Pyodide
     useEffect(() => {
@@ -108,11 +94,15 @@ const ExercisePage = () => {
         document.head.appendChild(script);
 
         return () => {
-            document.head.removeChild(script);
+            if (document.head.contains(script)) {
+                document.head.removeChild(script);
+            }
         };
     }, []);
 
     const runCode = useCallback(async () => {
+        if (!exercise) return;
+
         setIsRunning(true);
         setOutput('');
         setTestResults([]);
@@ -137,7 +127,7 @@ sys.stdout = StringIO()
                 setOutput(stdout || '(No output)');
 
                 // Check test cases
-                const results = mockExercise.testCases.map(testCase => {
+                const results = exercise.testCases.map((testCase: TestCase) => {
                     const passed = stdout.trim() === testCase.expectedOutput;
                     return {
                         passed,
@@ -147,21 +137,24 @@ sys.stdout = StringIO()
 
                 setTestResults(results);
 
-                if (results.every(r => r.passed)) {
+                if (results.every((r: { passed: boolean }) => r.passed)) {
                     setIsComplete(true);
                 }
             } else {
-                // Fallback: Simple evaluation for demo
+                // Fallback: Basic check when Pyodide isn't loaded
                 setOutput('⏳ Python environment loading... Running basic check.');
 
-                // Basic check for demo
-                if (code.includes('for x in range') && code.includes('if x % 2 == 0') && code.includes('x ** 2')) {
-                    setOutput('[4, 16, 36, 64, 100]');
-                    setTestResults([{ passed: true, message: '✓ Correct output' }]);
-                    setIsComplete(true);
-                } else {
-                    setOutput('Check your code - make sure to use list comprehension with the correct logic.');
-                    setTestResults([{ passed: false, message: '✗ Output does not match expected result' }]);
+                // Compare against expected output pattern
+                if (exercise.testCases.length > 0) {
+                    const expected = exercise.testCases[0].expectedOutput;
+                    // Simple pattern check - in production this would be more sophisticated
+                    if (code.includes('print') && code.length > exercise.starterCode.length) {
+                        setOutput(`Running code check...\nExpected: ${expected}`);
+                        setTestResults([{ passed: false, message: '⏳ Waiting for Python environment to verify' }]);
+                    } else {
+                        setOutput('Add your code and try again.');
+                        setTestResults([{ passed: false, message: '✗ Code appears incomplete' }]);
+                    }
                 }
             }
         } catch (error) {
@@ -171,47 +164,70 @@ sys.stdout = StringIO()
         } finally {
             setIsRunning(false);
         }
-    }, [code, pyodide]);
+    }, [code, pyodide, exercise]);
 
     const resetCode = () => {
-        setCode(mockExercise.starterCode);
+        if (!exercise) return;
+        setCode(exercise.starterCode);
         setOutput('');
         setTestResults([]);
         setIsComplete(false);
     };
 
     const toggleSolution = () => {
+        if (!exercise) return;
         setShowSolution(!showSolution);
         if (!showSolution) {
-            setCode(mockExercise.solution);
+            setCode(exercise.solution);
         } else {
-            setCode(mockExercise.starterCode);
+            setCode(exercise.starterCode);
         }
     };
+
+    // Loading or not found state
+    if (!exercise) {
+        return (
+            <div className="exercise-page">
+                <div className="exercise-not-found">
+                    <h2>Exercise Not Found</h2>
+                    <p>The exercise you're looking for doesn't exist.</p>
+                    <Link to="/courses" className="btn btn-primary">
+                        <ArrowLeft size={18} />
+                        Browse Courses
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="exercise-page">
             {/* Exercise Info Panel */}
             <aside className="exercise-info-panel">
                 <div className="exercise-header">
-                    <div className="exercise-breadcrumb">Python Basics / Lesson 5</div>
-                    <h1 className="exercise-title">{mockExercise.title}</h1>
+                    <Link to={`/courses/${exercise.courseId}`} className="exercise-breadcrumb">
+                        <ArrowLeft size={14} />
+                        {course?.title || 'Back to Course'}
+                    </Link>
+                    <h1 className="exercise-title">{exercise.title}</h1>
                     <div className="exercise-meta">
-                        <span className="badge badge-warning">{mockExercise.difficulty}</span>
+                        <span className={`badge ${difficultyColors[exercise.difficulty]}`}>
+                            {exercise.difficulty}
+                        </span>
                         <span className="exercise-meta-item">
                             <Trophy size={14} />
-                            {mockExercise.points} pts
+                            {exercise.points} pts
                         </span>
                         <span className="exercise-meta-item">
                             <Clock size={14} />
-                            {mockExercise.estimatedTime}
+                            {exercise.estimatedTime}
                         </span>
                     </div>
                 </div>
 
                 <div className="exercise-instructions">
                     <div className="instructions-content">
-                        <pre>{mockExercise.instructions}</pre>
+                        <pre>{exercise.instructions}</pre>
                     </div>
                 </div>
 
@@ -232,9 +248,9 @@ sys.stdout = StringIO()
                     {showHints && (
                         <div className="hints-content">
                             <p className="hint-text">
-                                <strong>Hint {currentHint + 1}:</strong> {mockExercise.hints[currentHint]}
+                                <strong>Hint {currentHint + 1}:</strong> {exercise.hints[currentHint]}
                             </p>
-                            {currentHint < mockExercise.hints.length - 1 && (
+                            {currentHint < exercise.hints.length - 1 && (
                                 <button
                                     className="btn btn-ghost btn-sm"
                                     onClick={() => setCurrentHint(currentHint + 1)}
@@ -372,12 +388,19 @@ sys.stdout = StringIO()
                         <div className="success-modal">
                             <div className="success-icon">🎉</div>
                             <h2>Congratulations!</h2>
-                            <p>You've completed this exercise and earned {mockExercise.points} points!</p>
+                            <p>You've completed this exercise and earned {exercise.points} points!</p>
                             <div className="success-actions">
-                                <button className="btn btn-primary">
-                                    Next Exercise
-                                    <ChevronRight size={18} />
-                                </button>
+                                {nextExercise ? (
+                                    <Link to={`/exercise/${nextExercise.id}`} className="btn btn-primary">
+                                        Next Exercise
+                                        <ChevronRight size={18} />
+                                    </Link>
+                                ) : (
+                                    <Link to={`/courses/${exercise.courseId}`} className="btn btn-primary">
+                                        Back to Course
+                                        <ChevronRight size={18} />
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>

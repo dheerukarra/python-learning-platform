@@ -9,6 +9,7 @@ import Layout from './components/Layout/Layout';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import CoursesPage from './pages/CoursesPage';
+import CourseDetailPage from './pages/CourseDetailPage';
 import ExercisePage from './pages/ExercisePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import ProfilePage from './pages/ProfilePage';
@@ -29,7 +30,7 @@ function App() {
                     <Route index element={<HomePage />} />
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="courses" element={<CoursesPage />} />
-                    <Route path="courses/:courseId" element={<CoursesPage />} />
+                    <Route path="courses/:courseId" element={<CourseDetailPage />} />
                     <Route path="exercise/:exerciseId" element={<ExercisePage />} />
                     <Route path="leaderboard" element={<LeaderboardPage />} />
                     <Route path="profile" element={<ProfilePage />} />
@@ -42,3 +43,4 @@ function App() {
 }
 
 export default App;
+
