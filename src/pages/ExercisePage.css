@@ -54,8 +54,8 @@
 }
 
 .instructions-content {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
     line-height: var(--line-height-relaxed);
 }
 
@@ -63,6 +63,7 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     font-family: var(--font-sans);
+    color: var(--color-text-primary);
 }
 
 .instructions-content code {

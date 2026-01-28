@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
     Search,
     Filter,
@@ -40,9 +40,20 @@ const difficultyColors: Record<string, string> = {
 };
 
 const CoursesPage = () => {
+    const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTrack, setSelectedTrack] = useState<string>('all');
     const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+
+    // Read track from URL on mount and when URL changes
+    useEffect(() => {
+        const trackFromUrl = searchParams.get('track');
+        if (trackFromUrl && ['development', 'datascience', 'devops'].includes(trackFromUrl)) {
+            setSelectedTrack(trackFromUrl);
+        } else {
+            setSelectedTrack('all');
+        }
+    }, [searchParams]);
 
     const filteredCourses = courses.filter((course) => {
         const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

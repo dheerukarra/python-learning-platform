@@ -11,29 +11,49 @@ import {
     Award,
     Settings
 } from 'lucide-react';
+import { useProgressStore } from '../../store/progressStore';
+import { exercises, courses } from '../../data/exercises';
 
 const Sidebar = () => {
+    const { completedExercises } = useProgressStore();
+
+    // Calculate real progress for each track
+    const getTrackProgress = (trackId: string) => {
+        const trackCourses = courses.filter(c => c.track === trackId);
+        const trackExerciseIds = exercises
+            .filter(e => trackCourses.some(c => c.id === e.courseId))
+            .map(e => e.id);
+
+        if (trackExerciseIds.length === 0) return 0;
+
+        const completedCount = completedExercises.filter(
+            ce => ce.completed && trackExerciseIds.includes(ce.exerciseId)
+        ).length;
+
+        return Math.round((completedCount / trackExerciseIds.length) * 100);
+    };
+
     const tracks = [
         {
             id: 'development',
             name: 'Development',
             icon: Code2,
-            progress: 65,
-            courses: 12
+            progress: getTrackProgress('development'),
+            courses: courses.filter(c => c.track === 'development').length
         },
         {
             id: 'datascience',
             name: 'Data Science',
             icon: Database,
-            progress: 30,
-            courses: 8
+            progress: getTrackProgress('datascience'),
+            courses: courses.filter(c => c.track === 'datascience').length
         },
         {
             id: 'devops',
             name: 'DevOps',
             icon: Cloud,
-            progress: 10,
-            courses: 6
+            progress: getTrackProgress('devops'),
+            courses: courses.filter(c => c.track === 'devops').length
         },
     ];
 
