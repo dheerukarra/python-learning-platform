@@ -389,13 +389,17 @@ sys.stdout = StringIO()
                         theme="vs-dark"
                         options={{
                             fontSize: 14,
-                            fontFamily: 'JetBrains Mono, monospace',
+                            fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace",
+                            fontLigatures: false,
                             minimap: { enabled: false },
                             lineNumbers: 'on',
                             scrollBeyondLastLine: false,
                             wordWrap: 'on',
                             padding: { top: 16 },
                             automaticLayout: true,
+                            cursorStyle: 'line',
+                            cursorWidth: 2,
+                            renderWhitespace: 'none',
                         }}
                     />
                 </div>
