@@ -30,13 +30,17 @@ const recommendedCourses = [
 
 const DashboardPage = () => {
     const { user, isAuthenticated } = useAuthStore();
-    const { totalXP, currentStreak, getTotalExercisesCompleted, getUnlockedAchievements } = useProgressStore();
+    const { totalXP, currentStreak, getTotalExercisesCompleted, getUnlockedAchievements, completedExercises } = useProgressStore();
 
     const exercisesCompleted = getTotalExercisesCompleted();
     const unlockedAchievements = getUnlockedAchievements();
 
     // Calculate rank based on XP (simple formula for demo)
     const rank = totalXP > 0 ? Math.max(1, 500 - Math.floor(totalXP / 10)) : 500;
+
+    // Calculate next exercise to continue - find first uncompleted or default to first exercise
+    const completedIds = completedExercises.filter(e => e.completed).map(e => e.exerciseId);
+    const nextExerciseId = recentExercises.find(e => !completedIds.includes(e.id))?.id || 'hello-world';
 
     // Show sign-in prompt if not authenticated
     if (!isAuthenticated) {
@@ -67,7 +71,7 @@ const DashboardPage = () => {
                     <p className="welcome-subtitle">Ready to continue your Python journey? You're doing great!</p>
                 </div>
                 <div className="welcome-actions">
-                    <Link to="/exercise/next" className="btn btn-primary">
+                    <Link to={`/exercise/${nextExerciseId}`} className="btn btn-primary">
                         <Play size={18} />
                         Continue Learning
                     </Link>
