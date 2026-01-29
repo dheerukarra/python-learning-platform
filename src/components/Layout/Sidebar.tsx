@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useSearchParams, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
     BookOpen,
@@ -16,6 +16,9 @@ import { exercises, courses } from '../../data/exercises';
 
 const Sidebar = () => {
     const { completedExercises } = useProgressStore();
+    const [searchParams] = useSearchParams();
+    const location = useLocation();
+    const currentTrack = location.pathname === '/courses' ? searchParams.get('track') : null;
 
     // Calculate real progress for each track
     const getTrackProgress = (trackId: string) => {
@@ -113,7 +116,7 @@ const Sidebar = () => {
                         <NavLink
                             key={track.id}
                             to={`/courses?track=${track.id}`}
-                            className="sidebar-nav-item"
+                            className={`sidebar-nav-item ${currentTrack === track.id ? 'active' : ''}`}
                         >
                             <div className={`sidebar-track-icon ${track.id}`}>
                                 <track.icon size={18} />

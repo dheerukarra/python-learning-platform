@@ -21,6 +21,7 @@ import Editor from '@monaco-editor/react';
 import { getExerciseById, exercises as allExercises, getCourseById } from '../data/exercises';
 import { useProgressStore } from '../store/progressStore';
 import { useAuthStore } from '../store/authStore';
+import CodeVisualization from '../components/CodeVisualization/CodeVisualization';
 import type { TestCase } from '../types';
 import './ExercisePage.css';
 
@@ -60,6 +61,7 @@ const ExercisePage = () => {
     const [showHints, setShowHints] = useState(false);
     const [currentHint, setCurrentHint] = useState(0);
     const [showSolution, setShowSolution] = useState(false);
+    const [showVisualization, setShowVisualization] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const [pyodideReady, setPyodideReady] = useState(false);
     const [pyodide, setPyodide] = useState<unknown>(null);
@@ -324,6 +326,25 @@ sys.stdout = StringIO()
                     {showSolution ? <EyeOff size={16} /> : <Eye size={16} />}
                     <span>{showSolution ? 'Hide Solution' : 'View Solution'}</span>
                 </button>
+
+                {/* Visualization Toggle */}
+                <button
+                    className="solution-toggle viz-toggle"
+                    onClick={() => setShowVisualization(!showVisualization)}
+                >
+                    <Zap size={16} />
+                    <span>{showVisualization ? 'Hide Visualization' : '✨ Step-by-Step Guide'}</span>
+                </button>
+
+                {/* Code Visualization */}
+                {showVisualization && (
+                    <div className="exercise-visualization">
+                        <CodeVisualization
+                            code={exercise.solution}
+                            title={exercise.title}
+                        />
+                    </div>
+                )}
             </aside>
 
             {/* Code Editor Panel */}
