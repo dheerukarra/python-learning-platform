@@ -111,7 +111,7 @@ const pythonSnippets = [
     { label: 'tryex', insertText: 'try:\n    ${1:pass}\nexcept ${2:Exception} as ${3:e}:\n    ${4:pass}', docs: 'Try-except block' },
     { label: 'withc', insertText: 'with ${1:expression} as ${2:var}:\n    ${3:pass}', docs: 'With statement' },
     { label: 'mainb', insertText: 'if __name__ == "__main__":\n    ${1:main()}', docs: 'Main block' },
-    { label: 'printf', insertText: 'print(f"${1:text}")', docs: 'Print with f-string' },
+    { label: 'fprint', insertText: 'print(f"${1:text}")', docs: 'Print with f-string' },
     { label: 'listc', insertText: '[${1:expr} for ${2:item} in ${3:iterable}]', docs: 'List comprehension' },
 ];
 
