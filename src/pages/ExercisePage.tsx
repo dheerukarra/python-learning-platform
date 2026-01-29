@@ -400,6 +400,30 @@ sys.stdout = StringIO()
                             cursorStyle: 'line',
                             cursorWidth: 2,
                             renderWhitespace: 'none',
+                            // IntelliSense settings
+                            quickSuggestions: {
+                                other: true,
+                                comments: false,
+                                strings: true,
+                            },
+                            suggestOnTriggerCharacters: true,
+                            acceptSuggestionOnEnter: 'on',
+                            tabCompletion: 'on',
+                            wordBasedSuggestions: 'currentDocument',
+                            suggest: {
+                                insertMode: 'replace',
+                                showKeywords: true,
+                                showSnippets: true,
+                                showFunctions: true,
+                                showVariables: true,
+                                showClasses: true,
+                                showMethods: true,
+                            },
+                            // Prevent auto-capitalization issues
+                            autoClosingBrackets: 'always',
+                            autoClosingQuotes: 'always',
+                            formatOnPaste: false,
+                            formatOnType: false,
                         }}
                     />
                 </div>
