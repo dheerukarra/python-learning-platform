@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, Eye, Code2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft } from 'lucide-react';
 import './CodeVisualization.css';
 
-interface CodeStep {
-    lineNumber: number;
-    code: string;
-    explanation: string;
-    variables?: { name: string; value: string; type: string }[];
-    highlight?: 'execute' | 'define' | 'loop' | 'condition' | 'output';
+interface VisualStep {
+    id: number;
+    title: string;
+    description: string;
+    visualType: 'variable' | 'print' | 'function' | 'loop' | 'condition' | 'list' | 'concept';
+    animation: 'fadeIn' | 'slideIn' | 'bounce' | 'pulse' | 'flow';
+    elements: VisualElement[];
+}
+
+interface VisualElement {
+    type: 'box' | 'arrow' | 'terminal' | 'loop-visual' | 'condition-visual' | 'function-visual' | 'list-visual';
+    label?: string;
+    value?: string;
+    from?: string;
+    to?: string;
+    color?: string;
 }
 
 interface CodeVisualizationProps {
@@ -15,190 +25,185 @@ interface CodeVisualizationProps {
     title: string;
 }
 
-// Parse code into steps with explanations
-const parseCodeToSteps = (code: string): CodeStep[] => {
-    const lines = code.split('\n').filter(line => line.trim() !== '');
-    const steps: CodeStep[] = [];
-    const variables: { name: string; value: string; type: string }[] = [];
+// Parse code into visual learning steps
+const parseCodeToVisuals = (code: string): VisualStep[] => {
+    const lines = code.split('\n').filter(line => line.trim() !== '' && !line.trim().startsWith('#'));
+    const steps: VisualStep[] = [];
+    const variables: Map<string, string> = new Map();
+    let stepId = 0;
 
-    lines.forEach((line, index) => {
-        const trimmedLine = line.trim();
+    lines.forEach((line) => {
+        const trimmed = line.trim();
 
-        // Skip comments-only lines for execution but include for context
-        if (trimmedLine.startsWith('#')) {
-            steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `📝 Comment: ${trimmedLine.slice(1).trim()}`,
-                variables: [...variables],
-                highlight: 'define'
-            });
-            return;
-        }
-
-        // Parse variable assignments
-        const assignMatch = trimmedLine.match(/^(\w+)\s*=\s*(.+)$/);
+        // Variable assignment
+        const assignMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
         if (assignMatch) {
             const [, varName, varValue] = assignMatch;
-            let type = 'unknown';
-            let displayValue = varValue;
+            variables.set(varName, varValue);
 
-            if (varValue.startsWith('"') || varValue.startsWith("'")) {
-                type = 'string';
-                displayValue = varValue;
-            } else if (varValue === 'True' || varValue === 'False') {
-                type = 'boolean';
-            } else if (varValue.includes('.')) {
-                type = 'float';
-            } else if (/^\d+$/.test(varValue)) {
-                type = 'integer';
-            } else if (varValue.startsWith('[')) {
-                type = 'list';
+            // Check for specific types
+            if (varValue.startsWith('[')) {
+                steps.push({
+                    id: stepId++,
+                    title: '📦 Creating a List',
+                    description: `A list called "${varName}" is created to store multiple items together!`,
+                    visualType: 'list',
+                    animation: 'slideIn',
+                    elements: [
+                        { type: 'list-visual', label: varName, value: varValue, color: '#9b59b6' }
+                    ]
+                });
             } else if (varValue.startsWith('{')) {
-                type = 'dict';
+                steps.push({
+                    id: stepId++,
+                    title: '🗂️ Creating a Dictionary',
+                    description: `A dictionary "${varName}" stores key-value pairs - like a real dictionary!`,
+                    visualType: 'variable',
+                    animation: 'slideIn',
+                    elements: [
+                        { type: 'box', label: varName, value: 'Dict {...}', color: '#e67e22' }
+                    ]
+                });
             } else if (varValue.startsWith('f"') || varValue.startsWith("f'")) {
-                type = 'f-string';
-            }
-
-            // Update or add variable
-            const existingIdx = variables.findIndex(v => v.name === varName);
-            if (existingIdx >= 0) {
-                variables[existingIdx] = { name: varName, value: displayValue, type };
+                steps.push({
+                    id: stepId++,
+                    title: '✨ F-String Magic',
+                    description: `An f-string combines text with variable values. The {name} gets replaced with actual data!`,
+                    visualType: 'variable',
+                    animation: 'pulse',
+                    elements: [
+                        { type: 'box', label: varName, value: varValue, color: '#1abc9c' }
+                    ]
+                });
             } else {
-                variables.push({ name: varName, value: displayValue, type });
+                steps.push({
+                    id: stepId++,
+                    title: '📦 Storing Data',
+                    description: `Create a variable called "${varName}" and store the value ${varValue} in it.`,
+                    visualType: 'variable',
+                    animation: 'bounce',
+                    elements: [
+                        { type: 'box', label: varName, value: varValue, color: '#3498db' }
+                    ]
+                });
             }
+            return;
+        }
 
+        // Print statement
+        if (trimmed.startsWith('print(')) {
+            const content = trimmed.match(/print\((.+)\)$/)?.[1] || '';
             steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `📦 Create variable \`${varName}\` and assign ${type === 'string' ? 'text' : type} value: ${displayValue}`,
-                variables: [...variables],
-                highlight: 'execute'
+                id: stepId++,
+                title: '🖨️ Displaying Output',
+                description: `Python sends "${content}" to the screen so you can see the result!`,
+                visualType: 'print',
+                animation: 'flow',
+                elements: [
+                    { type: 'arrow', from: 'Code', to: 'Screen' },
+                    { type: 'terminal', value: content }
+                ]
             });
             return;
         }
 
-        // Parse print statements
-        if (trimmedLine.startsWith('print(')) {
-            const printContent = trimmedLine.match(/print\((.+)\)$/)?.[1] || '';
-            steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `🖨️ Output to console: ${printContent}`,
-                variables: [...variables],
-                highlight: 'output'
-            });
-            return;
-        }
-
-        // Parse function definitions
-        if (trimmedLine.startsWith('def ')) {
-            const funcMatch = trimmedLine.match(/def\s+(\w+)\s*\(([^)]*)\)/);
+        // Function definition
+        if (trimmed.startsWith('def ')) {
+            const funcMatch = trimmed.match(/def\s+(\w+)\s*\(([^)]*)\)/);
             if (funcMatch) {
                 const [, funcName, params] = funcMatch;
                 steps.push({
-                    lineNumber: index + 1,
-                    code: line,
-                    explanation: `📋 Define function \`${funcName}\`${params ? ` with parameters: ${params}` : ''}`,
-                    variables: [...variables],
-                    highlight: 'define'
+                    id: stepId++,
+                    title: '🔧 Building a Function',
+                    description: `A function is like a recipe! "${funcName}" can be called anytime. ${params ? `It takes: ${params}` : ''}`,
+                    visualType: 'function',
+                    animation: 'slideIn',
+                    elements: [
+                        { type: 'function-visual', label: funcName, value: params || 'no params', color: '#9b59b6' }
+                    ]
                 });
-                return;
             }
+            return;
         }
 
-        // Parse for loops
-        if (trimmedLine.startsWith('for ')) {
-            const forMatch = trimmedLine.match(/for\s+(\w+)\s+in\s+(.+):/);
+        // For loop
+        if (trimmed.startsWith('for ')) {
+            const forMatch = trimmed.match(/for\s+(\w+)\s+in\s+(.+):/);
             if (forMatch) {
                 const [, loopVar, iterable] = forMatch;
                 steps.push({
-                    lineNumber: index + 1,
-                    code: line,
-                    explanation: `🔁 Loop: For each \`${loopVar}\` in ${iterable}`,
-                    variables: [...variables],
-                    highlight: 'loop'
+                    id: stepId++,
+                    title: '🔄 Loop Time!',
+                    description: `The loop repeats for each item in ${iterable}. Each time, "${loopVar}" becomes the next value!`,
+                    visualType: 'loop',
+                    animation: 'pulse',
+                    elements: [
+                        { type: 'loop-visual', label: loopVar, value: iterable, color: '#e74c3c' }
+                    ]
                 });
-                return;
             }
+            return;
         }
 
-        // Parse if statements
-        if (trimmedLine.startsWith('if ')) {
-            const condition = trimmedLine.match(/if\s+(.+):/)?.[1] || '';
+        // If statement
+        if (trimmed.startsWith('if ')) {
+            const condition = trimmed.match(/if\s+(.+):/)?.[1] || '';
             steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `❓ Condition: If ${condition} is true, execute the next block`,
-                variables: [...variables],
-                highlight: 'condition'
+                id: stepId++,
+                title: '❓ Making a Decision',
+                description: `Python checks: Is "${condition}" true? If yes, run the next block of code!`,
+                visualType: 'condition',
+                animation: 'fadeIn',
+                elements: [
+                    { type: 'condition-visual', label: 'IF', value: condition, color: '#f1c40f' }
+                ]
             });
             return;
         }
 
-        // Parse elif
-        if (trimmedLine.startsWith('elif ')) {
-            const condition = trimmedLine.match(/elif\s+(.+):/)?.[1] || '';
+        // Return statement
+        if (trimmed.startsWith('return ')) {
+            const returnValue = trimmed.slice(7);
             steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `❓ Else if: If previous was false and ${condition} is true`,
-                variables: [...variables],
-                highlight: 'condition'
+                id: stepId++,
+                title: '↩️ Sending Back a Result',
+                description: `The function finishes and sends back: ${returnValue}`,
+                visualType: 'concept',
+                animation: 'flow',
+                elements: [
+                    { type: 'arrow', from: 'Function', to: 'Caller' },
+                    { type: 'box', label: 'Result', value: returnValue, color: '#2ecc71' }
+                ]
             });
             return;
         }
-
-        // Parse else
-        if (trimmedLine === 'else:') {
-            steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `❓ Else: If all previous conditions were false`,
-                variables: [...variables],
-                highlight: 'condition'
-            });
-            return;
-        }
-
-        // Parse return statements
-        if (trimmedLine.startsWith('return ')) {
-            const returnValue = trimmedLine.slice(7);
-            steps.push({
-                lineNumber: index + 1,
-                code: line,
-                explanation: `↩️ Return value: ${returnValue}`,
-                variables: [...variables],
-                highlight: 'output'
-            });
-            return;
-        }
-
-        // Default: generic step
-        steps.push({
-            lineNumber: index + 1,
-            code: line,
-            explanation: `⚡ Execute: ${trimmedLine}`,
-            variables: [...variables],
-            highlight: 'execute'
-        });
     });
+
+    // Add intro step
+    if (steps.length > 0) {
+        steps.unshift({
+            id: -1,
+            title: '🎯 Let\'s Learn This Code!',
+            description: 'Watch the animation to understand how each part works. Click play or use the arrows!',
+            visualType: 'concept',
+            animation: 'fadeIn',
+            elements: []
+        });
+    }
 
     return steps;
 };
 
-const CodeVisualization = ({ code, title }: CodeVisualizationProps) => {
-    const [steps] = useState(() => parseCodeToSteps(code));
+const CodeVisualization = ({ code, title: _title }: CodeVisualizationProps) => {
+    const [steps] = useState(() => parseCodeToVisuals(code));
     const [currentStep, setCurrentStep] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [showCode, setShowCode] = useState(true);
 
-    // Auto-play functionality
     useEffect(() => {
         if (isPlaying && currentStep < steps.length - 1) {
             const timer = setTimeout(() => {
                 setCurrentStep(prev => prev + 1);
-            }, 2000);
+            }, 3000);
             return () => clearTimeout(timer);
         } else if (currentStep >= steps.length - 1) {
             setIsPlaying(false);
@@ -206,15 +211,11 @@ const CodeVisualization = ({ code, title }: CodeVisualizationProps) => {
     }, [isPlaying, currentStep, steps.length]);
 
     const handleNext = () => {
-        if (currentStep < steps.length - 1) {
-            setCurrentStep(prev => prev + 1);
-        }
+        if (currentStep < steps.length - 1) setCurrentStep(prev => prev + 1);
     };
 
     const handlePrev = () => {
-        if (currentStep > 0) {
-            setCurrentStep(prev => prev - 1);
-        }
+        if (currentStep > 0) setCurrentStep(prev => prev - 1);
     };
 
     const handleReset = () => {
@@ -223,128 +224,187 @@ const CodeVisualization = ({ code, title }: CodeVisualizationProps) => {
     };
 
     const togglePlay = () => {
-        if (currentStep >= steps.length - 1) {
-            setCurrentStep(0);
-        }
+        if (currentStep >= steps.length - 1) setCurrentStep(0);
         setIsPlaying(!isPlaying);
     };
 
-    const currentStepData = steps[currentStep];
+    const step = steps[currentStep];
+
+    if (steps.length === 0) {
+        return (
+            <div className="code-viz-v2">
+                <div className="viz-empty">No visualization available for this code.</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="code-visualization">
-            <div className="viz-header">
-                <div className="viz-title">
-                    <Eye size={16} />
-                    <span>Step-by-Step Visualization</span>
+        <div className="code-viz-v2">
+            {/* Visual Canvas */}
+            <div className="viz-canvas">
+                <div className="viz-title-bar">
+                    <span className="viz-badge">✨ Visual Learning</span>
+                    <span className="viz-step-counter">{currentStep + 1} / {steps.length}</span>
                 </div>
-                <button
-                    className="viz-toggle-code"
-                    onClick={() => setShowCode(!showCode)}
-                >
-                    <Code2 size={14} />
-                    {showCode ? 'Hide Code' : 'Show Code'}
-                </button>
-            </div>
 
-            <div className="viz-content">
-                {/* Code Panel */}
-                {showCode && (
-                    <div className="viz-code-panel">
-                        <div className="viz-code-header">
-                            <span>{title}</span>
-                        </div>
-                        <div className="viz-code-lines">
-                            {steps.map((step, index) => (
-                                <div
-                                    key={step.lineNumber}
-                                    className={`viz-code-line ${index === currentStep ? 'active' : ''} ${index < currentStep ? 'passed' : ''} ${step.highlight}`}
-                                >
-                                    <span className="line-number">{step.lineNumber}</span>
-                                    <code>{step.code}</code>
-                                    {index === currentStep && (
-                                        <div className="execution-indicator">
-                                            <span className="pulse-dot"></span>
+                <div className={`viz-stage ${step.animation}`}>
+                    {/* Main Title */}
+                    <h3 className="viz-step-title">{step.title}</h3>
+
+                    {/* Visual Elements */}
+                    <div className="viz-elements">
+                        {step.elements.map((element, idx) => (
+                            <div key={idx} className={`viz-element viz-${element.type}`} style={{ animationDelay: `${idx * 0.2}s` }}>
+                                {element.type === 'box' && (
+                                    <div className="memory-box" style={{ borderColor: element.color }}>
+                                        <div className="memory-label" style={{ backgroundColor: element.color }}>
+                                            {element.label}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Explanation Panel */}
-                <div className="viz-explanation-panel">
-                    <div className="viz-step-info">
-                        <span className="step-counter">
-                            Step {currentStep + 1} of {steps.length}
-                        </span>
-                        <div className="progress-bar">
-                            <div
-                                className="progress-fill"
-                                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="viz-explanation">
-                        <div className={`explanation-card ${currentStepData?.highlight}`}>
-                            <p className="explanation-text">
-                                {currentStepData?.explanation}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Variables State */}
-                    {currentStepData?.variables && currentStepData.variables.length > 0 && (
-                        <div className="viz-variables">
-                            <h4>📊 Current Variables</h4>
-                            <div className="variables-grid">
-                                {currentStepData.variables.map((variable, idx) => (
-                                    <div
-                                        key={variable.name}
-                                        className="variable-box"
-                                        style={{ animationDelay: `${idx * 0.1}s` }}
-                                    >
-                                        <span className="var-name">{variable.name}</span>
-                                        <span className="var-value">{variable.value}</span>
-                                        <span className="var-type">{variable.type}</span>
+                                        <div className="memory-value">{element.value}</div>
                                     </div>
-                                ))}
+                                )}
+
+                                {element.type === 'terminal' && (
+                                    <div className="terminal-output">
+                                        <div className="terminal-header">
+                                            <span className="terminal-dot red"></span>
+                                            <span className="terminal-dot yellow"></span>
+                                            <span className="terminal-dot green"></span>
+                                            <span className="terminal-title">Output</span>
+                                        </div>
+                                        <div className="terminal-body">
+                                            <span className="terminal-prompt">&gt;&gt;&gt;</span>
+                                            <span className="terminal-text">{element.value}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {element.type === 'arrow' && (
+                                    <div className="flow-arrow">
+                                        <span className="arrow-from">{element.from}</span>
+                                        <div className="arrow-line">
+                                            <div className="arrow-dot"></div>
+                                            <div className="arrow-dot"></div>
+                                            <div className="arrow-dot"></div>
+                                            <div className="arrow-head">→</div>
+                                        </div>
+                                        <span className="arrow-to">{element.to}</span>
+                                    </div>
+                                )}
+
+                                {element.type === 'loop-visual' && (
+                                    <div className="loop-container">
+                                        <div className="loop-circle">
+                                            <div className="loop-arrow-circle"></div>
+                                            <span className="loop-icon">🔄</span>
+                                        </div>
+                                        <div className="loop-info">
+                                            <span className="loop-var">{element.label}</span>
+                                            <span className="loop-in">iterates through</span>
+                                            <span className="loop-source">{element.value}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {element.type === 'condition-visual' && (
+                                    <div className="condition-container">
+                                        <div className="condition-diamond">
+                                            <span>?</span>
+                                        </div>
+                                        <div className="condition-text">{element.value}</div>
+                                        <div className="condition-branches">
+                                            <div className="branch branch-yes">
+                                                <span className="branch-label">✓ Yes</span>
+                                                <div className="branch-line"></div>
+                                            </div>
+                                            <div className="branch branch-no">
+                                                <span className="branch-label">✗ No</span>
+                                                <div className="branch-line"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {element.type === 'function-visual' && (
+                                    <div className="function-container">
+                                        <div className="function-box">
+                                            <div className="function-header">
+                                                <span className="function-icon">⚙️</span>
+                                                <span className="function-name">{element.label}()</span>
+                                            </div>
+                                            <div className="function-body">
+                                                <div className="function-input">
+                                                    <span>Input: {element.value}</span>
+                                                </div>
+                                                <div className="function-arrow">↓</div>
+                                                <div className="function-process">
+                                                    <span>Process...</span>
+                                                </div>
+                                                <div className="function-arrow">↓</div>
+                                                <div className="function-output">
+                                                    <span>Output</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {element.type === 'list-visual' && (
+                                    <div className="list-container">
+                                        <div className="list-label">{element.label}</div>
+                                        <div className="list-boxes">
+                                            {element.value?.replace(/[\[\]]/g, '').split(',').slice(0, 5).map((item, i) => (
+                                                <div key={i} className="list-item" style={{ animationDelay: `${i * 0.15}s` }}>
+                                                    <span className="list-index">{i}</span>
+                                                    <span className="list-value">{item.trim()}</span>
+                                                </div>
+                                            ))}
+                                            {(element.value?.split(',').length || 0) > 5 && (
+                                                <div className="list-more">...</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        ))}
+
+                        {step.elements.length === 0 && (
+                            <div className="viz-intro">
+                                <div className="intro-icon">🚀</div>
+                                <p>Ready to explore?</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Description */}
+                    <p className="viz-description">{step.description}</p>
+                </div>
+
+                {/* Progress */}
+                <div className="viz-progress">
+                    {steps.map((_, idx) => (
+                        <button
+                            key={idx}
+                            className={`progress-dot ${idx === currentStep ? 'active' : ''} ${idx < currentStep ? 'done' : ''}`}
+                            onClick={() => setCurrentStep(idx)}
+                        />
+                    ))}
                 </div>
             </div>
 
             {/* Controls */}
-            <div className="viz-controls">
-                <button
-                    className="viz-btn"
-                    onClick={handleReset}
-                    disabled={currentStep === 0 && !isPlaying}
-                >
+            <div className="viz-controls-v2">
+                <button className="viz-btn" onClick={handleReset} disabled={currentStep === 0}>
                     <RotateCcw size={16} />
                 </button>
-                <button
-                    className="viz-btn"
-                    onClick={handlePrev}
-                    disabled={currentStep === 0}
-                >
-                    <ChevronLeft size={18} />
+                <button className="viz-btn" onClick={handlePrev} disabled={currentStep === 0}>
+                    <ChevronLeft size={20} />
                 </button>
-                <button
-                    className="viz-btn play-btn"
-                    onClick={togglePlay}
-                >
-                    {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                <button className="viz-btn play-btn" onClick={togglePlay}>
+                    {isPlaying ? <Pause size={20} /> : <Play size={20} />}
                 </button>
-                <button
-                    className="viz-btn"
-                    onClick={handleNext}
-                    disabled={currentStep >= steps.length - 1}
-                >
-                    <ChevronRight size={18} />
+                <button className="viz-btn" onClick={handleNext} disabled={currentStep >= steps.length - 1}>
+                    <ChevronRight size={20} />
                 </button>
             </div>
         </div>
