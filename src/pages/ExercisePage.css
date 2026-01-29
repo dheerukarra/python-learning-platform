@@ -74,6 +74,26 @@
     font-size: var(--font-size-xs);
 }
 
+/* Bold important text in instructions */
+.instructions-content strong,
+.instructions-content b {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+.instructions-content .task-label {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: white;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-2);
+}
+
 /* Hints */
 .exercise-hints {
     padding: var(--spacing-4) var(--spacing-6);

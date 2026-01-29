@@ -116,6 +116,48 @@ const pythonSnippets = [
 ];
 
 export function handleEditorWillMount(monaco: Monaco) {
+    // Define custom dark blue theme
+    monaco.editor.defineTheme('python-dark-blue', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+            { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
+            { token: 'keyword', foreground: '569CD6', fontStyle: 'bold' },
+            { token: 'string', foreground: 'CE9178' },
+            { token: 'number', foreground: 'B5CEA8' },
+            { token: 'type', foreground: '4EC9B0' },
+            { token: 'function', foreground: 'DCDCAA' },
+            { token: 'variable', foreground: '9CDCFE' },
+            { token: 'operator', foreground: 'D4D4D4' },
+            { token: 'delimiter', foreground: 'D4D4D4' },
+        ],
+        colors: {
+            'editor.background': '#0D1B2A',
+            'editor.foreground': '#E0E0E0',
+            'editor.lineHighlightBackground': '#1B2838',
+            'editor.selectionBackground': '#264F78',
+            'editor.inactiveSelectionBackground': '#1E3A5F',
+            'editorCursor.foreground': '#00D9FF',
+            'editorLineNumber.foreground': '#4A6A8A',
+            'editorLineNumber.activeForeground': '#00D9FF',
+            'editor.selectionHighlightBackground': '#1E3A5F55',
+            'editorIndentGuide.background': '#1E3A5F',
+            'editorIndentGuide.activeBackground': '#3B5998',
+            'editorBracketMatch.background': '#264F7844',
+            'editorBracketMatch.border': '#00D9FF',
+            'editorWidget.background': '#0D1B2A',
+            'editorWidget.border': '#1E3A5F',
+            'editorSuggestWidget.background': '#0D1B2A',
+            'editorSuggestWidget.border': '#1E3A5F',
+            'editorSuggestWidget.selectedBackground': '#264F78',
+            'editorSuggestWidget.highlightForeground': '#00D9FF',
+            'list.hoverBackground': '#1E3A5F',
+            'scrollbarSlider.background': '#1E3A5F88',
+            'scrollbarSlider.hoverBackground': '#3B599888',
+            'scrollbarSlider.activeBackground': '#4A6A8A88',
+        }
+    });
+
     // Register Python completion provider
     monaco.languages.registerCompletionItemProvider('python', {
         provideCompletionItems: (model: Parameters<Parameters<typeof monaco.languages.registerCompletionItemProvider>[1]['provideCompletionItems']>[0], position: Parameters<Parameters<typeof monaco.languages.registerCompletionItemProvider>[1]['provideCompletionItems']>[1]) => {

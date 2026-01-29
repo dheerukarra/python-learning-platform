@@ -32,6 +32,30 @@ const difficultyColors: Record<string, string> = {
     advanced: 'badge-error'
 };
 
+// Format instructions to bold important keywords
+const formatInstructions = (text: string): React.ReactNode => {
+    // Split by code blocks first
+    const parts = text.split(/(`[^`]+`)/g);
+
+    return parts.map((part, index) => {
+        if (part.startsWith('`') && part.endsWith('`')) {
+            // It's a code block
+            return <code key={index}>{part.slice(1, -1)}</code>;
+        }
+
+        // Bold important keywords
+        const boldPattern = /(Task:|Goal:|Objective:|Expected Output:|Output:|Input:|Example:|Note:|Tip:|Important:|Warning:|Remember:)/gi;
+        const segments = part.split(boldPattern);
+
+        return segments.map((segment, segIndex) => {
+            if (boldPattern.test(segment)) {
+                return <strong key={`${index}-${segIndex}`}>{segment}</strong>;
+            }
+            return segment;
+        });
+    });
+};
+
 const ExercisePage = () => {
     const { exerciseId } = useParams();
     const { isAuthenticated } = useAuthStore();
@@ -284,7 +308,7 @@ sys.stdout = StringIO()
 
                 <div className="exercise-instructions">
                     <div className="instructions-content">
-                        <pre>{exercise.instructions}</pre>
+                        <pre>{formatInstructions(exercise.instructions)}</pre>
                     </div>
                 </div>
 
@@ -387,7 +411,7 @@ sys.stdout = StringIO()
                         defaultLanguage="python"
                         value={code}
                         onChange={(value) => setCode(value || '')}
-                        theme="vs-dark"
+                        theme="python-dark-blue"
                         beforeMount={handleEditorWillMount}
                         options={{
                             fontSize: 14,
