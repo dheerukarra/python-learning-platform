@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
     Play,
@@ -22,7 +22,7 @@ import { getExerciseById, exercises as allExercises, getCourseById } from '../da
 import { useProgressStore } from '../store/progressStore';
 import { useAuthStore } from '../store/authStore';
 import CodeVisualization from '../components/CodeVisualization/CodeVisualization';
-import { registerPythonCompletions } from '../utils/pythonCompletions';
+import { handleEditorWillMount } from '../utils/pythonCompletions';
 import type { TestCase } from '../types';
 import './ExercisePage.css';
 
@@ -66,15 +66,6 @@ const ExercisePage = () => {
     const [isComplete, setIsComplete] = useState(false);
     const [pyodideReady, setPyodideReady] = useState(false);
     const [pyodide, setPyodide] = useState<unknown>(null);
-    const completionsRegistered = useRef(false);
-
-    // Register Python completions once
-    useEffect(() => {
-        if (!completionsRegistered.current) {
-            registerPythonCompletions();
-            completionsRegistered.current = true;
-        }
-    }, []);
 
     // Reset state when exercise changes
     useEffect(() => {
@@ -397,6 +388,7 @@ sys.stdout = StringIO()
                         value={code}
                         onChange={(value) => setCode(value || '')}
                         theme="vs-dark"
+                        beforeMount={handleEditorWillMount}
                         options={{
                             fontSize: 14,
                             fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace",

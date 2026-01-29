@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor';
+import type { Monaco } from '@monaco-editor/react';
 
 // Python keywords
 const pythonKeywords = [
@@ -45,23 +45,15 @@ const pythonBuiltins = [
     { name: 'chr', detail: 'chr(i)', docs: 'Return character from Unicode code point' },
     { name: 'hex', detail: 'hex(x)', docs: 'Convert integer to hex string' },
     { name: 'bin', detail: 'bin(x)', docs: 'Convert integer to binary string' },
-    { name: 'oct', detail: 'oct(x)', docs: 'Convert integer to octal string' },
     { name: 'all', detail: 'all(iterable)', docs: 'Return True if all elements are true' },
     { name: 'any', detail: 'any(iterable)', docs: 'Return True if any element is true' },
     { name: 'format', detail: 'format(value, format_spec)', docs: 'Format a value' },
     { name: 'repr', detail: 'repr(obj)', docs: 'Return string representation' },
     { name: 'id', detail: 'id(obj)', docs: 'Return identity of object' },
     { name: 'dir', detail: 'dir(obj)', docs: 'List of valid attributes for object' },
-    { name: 'help', detail: 'help(obj)', docs: 'Invoke the built-in help system' },
-    { name: 'vars', detail: 'vars(obj)', docs: 'Return __dict__ attribute' },
     { name: 'iter', detail: 'iter(obj)', docs: 'Return an iterator object' },
     { name: 'next', detail: 'next(iterator)', docs: 'Get next item from iterator' },
-    { name: 'slice', detail: 'slice(start, stop, step)', docs: 'Create a slice object' },
-    { name: 'eval', detail: 'eval(expression)', docs: 'Evaluate a Python expression' },
-    { name: 'exec', detail: 'exec(code)', docs: 'Execute Python code dynamically' },
     { name: 'callable', detail: 'callable(obj)', docs: 'Check if object is callable' },
-    { name: 'globals', detail: 'globals()', docs: 'Return current global symbol table' },
-    { name: 'locals', detail: 'locals()', docs: 'Return current local symbol table' },
 ];
 
 // Common string methods
@@ -78,15 +70,8 @@ const stringMethods = [
     { name: 'endswith', detail: 'str.endswith(suffix)', docs: 'Check if string ends with suffix' },
     { name: 'isdigit', detail: 'str.isdigit()', docs: 'Check if all characters are digits' },
     { name: 'isalpha', detail: 'str.isalpha()', docs: 'Check if all characters are alphabetic' },
-    { name: 'isalnum', detail: 'str.isalnum()', docs: 'Check if all characters are alphanumeric' },
     { name: 'capitalize', detail: 'str.capitalize()', docs: 'Return capitalized copy' },
     { name: 'title', detail: 'str.title()', docs: 'Return titlecased copy' },
-    { name: 'format', detail: 'str.format(*args)', docs: 'Format string with arguments' },
-    { name: 'encode', detail: 'str.encode(encoding)', docs: 'Encode string to bytes' },
-    { name: 'zfill', detail: 'str.zfill(width)', docs: 'Pad string with zeros' },
-    { name: 'center', detail: 'str.center(width)', docs: 'Center string in given width' },
-    { name: 'ljust', detail: 'str.ljust(width)', docs: 'Left justify string' },
-    { name: 'rjust', detail: 'str.rjust(width)', docs: 'Right justify string' },
 ];
 
 // Common list methods
@@ -98,7 +83,6 @@ const listMethods = [
     { name: 'pop', detail: 'list.pop(i)', docs: 'Remove and return item at index' },
     { name: 'clear', detail: 'list.clear()', docs: 'Remove all items from list' },
     { name: 'index', detail: 'list.index(x)', docs: 'Return index of first occurrence' },
-    { name: 'count', detail: 'list.count(x)', docs: 'Count occurrences of value' },
     { name: 'sort', detail: 'list.sort()', docs: 'Sort list in place' },
     { name: 'reverse', detail: 'list.reverse()', docs: 'Reverse list in place' },
     { name: 'copy', detail: 'list.copy()', docs: 'Return shallow copy of list' },
@@ -113,33 +97,28 @@ const dictMethods = [
     { name: 'pop', detail: 'dict.pop(key)', docs: 'Remove key and return value' },
     { name: 'update', detail: 'dict.update(other)', docs: 'Update dictionary with key/value pairs' },
     { name: 'clear', detail: 'dict.clear()', docs: 'Remove all items from dictionary' },
-    { name: 'copy', detail: 'dict.copy()', docs: 'Return shallow copy of dictionary' },
-    { name: 'setdefault', detail: 'dict.setdefault(key, default)', docs: 'Get value or set default' },
 ];
 
 // Code snippets
 const pythonSnippets = [
-    { label: 'def', insertText: 'def ${1:function_name}(${2:params}):\n\t${3:pass}', docs: 'Define a function' },
-    { label: 'class', insertText: 'class ${1:ClassName}:\n\tdef __init__(self${2:, params}):\n\t\t${3:pass}', docs: 'Define a class' },
-    { label: 'if', insertText: 'if ${1:condition}:\n\t${2:pass}', docs: 'If statement' },
-    { label: 'ifelse', insertText: 'if ${1:condition}:\n\t${2:pass}\nelse:\n\t${3:pass}', docs: 'If-else statement' },
-    { label: 'elif', insertText: 'elif ${1:condition}:\n\t${2:pass}', docs: 'Elif clause' },
-    { label: 'for', insertText: 'for ${1:item} in ${2:iterable}:\n\t${3:pass}', docs: 'For loop' },
-    { label: 'forrange', insertText: 'for ${1:i} in range(${2:n}):\n\t${3:pass}', docs: 'For loop with range' },
-    { label: 'while', insertText: 'while ${1:condition}:\n\t${2:pass}', docs: 'While loop' },
-    { label: 'try', insertText: 'try:\n\t${1:pass}\nexcept ${2:Exception} as ${3:e}:\n\t${4:pass}', docs: 'Try-except block' },
-    { label: 'tryfinally', insertText: 'try:\n\t${1:pass}\nexcept ${2:Exception} as ${3:e}:\n\t${4:pass}\nfinally:\n\t${5:pass}', docs: 'Try-except-finally block' },
-    { label: 'with', insertText: 'with ${1:expression} as ${2:var}:\n\t${3:pass}', docs: 'With statement' },
-    { label: 'lambda', insertText: 'lambda ${1:args}: ${2:expression}', docs: 'Lambda function' },
-    { label: 'list_comp', insertText: '[${1:expr} for ${2:item} in ${3:iterable}]', docs: 'List comprehension' },
-    { label: 'dict_comp', insertText: '{${1:key}: ${2:value} for ${3:item} in ${4:iterable}}', docs: 'Dictionary comprehension' },
-    { label: 'main', insertText: 'if __name__ == "__main__":\n\t${1:main()}', docs: 'Main block' },
-    { label: 'print_f', insertText: 'print(f"${1:text}")', docs: 'Print with f-string' },
+    { label: 'defn', insertText: 'def ${1:function_name}(${2:params}):\n    ${3:pass}', docs: 'Define a function' },
+    { label: 'classc', insertText: 'class ${1:ClassName}:\n    def __init__(self${2:}):\n        ${3:pass}', docs: 'Define a class' },
+    { label: 'ifc', insertText: 'if ${1:condition}:\n    ${2:pass}', docs: 'If statement' },
+    { label: 'ifelse', insertText: 'if ${1:condition}:\n    ${2:pass}\nelse:\n    ${3:pass}', docs: 'If-else statement' },
+    { label: 'forl', insertText: 'for ${1:item} in ${2:iterable}:\n    ${3:pass}', docs: 'For loop' },
+    { label: 'forr', insertText: 'for ${1:i} in range(${2:n}):\n    ${3:pass}', docs: 'For loop with range' },
+    { label: 'whilel', insertText: 'while ${1:condition}:\n    ${2:pass}', docs: 'While loop' },
+    { label: 'tryex', insertText: 'try:\n    ${1:pass}\nexcept ${2:Exception} as ${3:e}:\n    ${4:pass}', docs: 'Try-except block' },
+    { label: 'withc', insertText: 'with ${1:expression} as ${2:var}:\n    ${3:pass}', docs: 'With statement' },
+    { label: 'mainb', insertText: 'if __name__ == "__main__":\n    ${1:main()}', docs: 'Main block' },
+    { label: 'printf', insertText: 'print(f"${1:text}")', docs: 'Print with f-string' },
+    { label: 'listc', insertText: '[${1:expr} for ${2:item} in ${3:iterable}]', docs: 'List comprehension' },
 ];
 
-export function registerPythonCompletions() {
+export function handleEditorWillMount(monaco: Monaco) {
+    // Register Python completion provider
     monaco.languages.registerCompletionItemProvider('python', {
-        provideCompletionItems: (model, position) => {
+        provideCompletionItems: (model: Parameters<Parameters<typeof monaco.languages.registerCompletionItemProvider>[1]['provideCompletionItems']>[0], position: Parameters<Parameters<typeof monaco.languages.registerCompletionItemProvider>[1]['provideCompletionItems']>[1]) => {
             const word = model.getWordUntilPosition(position);
             const range = {
                 startLineNumber: position.lineNumber,
@@ -148,7 +127,15 @@ export function registerPythonCompletions() {
                 endColumn: word.endColumn,
             };
 
-            const suggestions: monaco.languages.CompletionItem[] = [];
+            const suggestions: Array<{
+                label: string;
+                kind: number;
+                insertText: string;
+                insertTextRules?: number;
+                range: typeof range;
+                detail?: string;
+                documentation?: string;
+            }> = [];
 
             // Add keywords
             pythonKeywords.forEach(keyword => {
@@ -157,7 +144,7 @@ export function registerPythonCompletions() {
                     kind: monaco.languages.CompletionItemKind.Keyword,
                     insertText: keyword,
                     range: range,
-                    detail: 'keyword',
+                    detail: 'Python keyword',
                 });
             });
 
@@ -166,7 +153,8 @@ export function registerPythonCompletions() {
                 suggestions.push({
                     label: func.name,
                     kind: monaco.languages.CompletionItemKind.Function,
-                    insertText: func.name,
+                    insertText: func.name + '($0)',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range: range,
                     detail: func.detail,
                     documentation: func.docs,
@@ -178,7 +166,8 @@ export function registerPythonCompletions() {
                 suggestions.push({
                     label: method.name,
                     kind: monaco.languages.CompletionItemKind.Method,
-                    insertText: method.name,
+                    insertText: method.name + '($0)',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range: range,
                     detail: method.detail,
                     documentation: method.docs,
@@ -190,7 +179,8 @@ export function registerPythonCompletions() {
                 suggestions.push({
                     label: method.name,
                     kind: monaco.languages.CompletionItemKind.Method,
-                    insertText: method.name,
+                    insertText: method.name + '($0)',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range: range,
                     detail: method.detail,
                     documentation: method.docs,
@@ -202,7 +192,8 @@ export function registerPythonCompletions() {
                 suggestions.push({
                     label: method.name,
                     kind: monaco.languages.CompletionItemKind.Method,
-                    insertText: method.name,
+                    insertText: method.name + '($0)',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range: range,
                     detail: method.detail,
                     documentation: method.docs,
@@ -217,12 +208,13 @@ export function registerPythonCompletions() {
                     insertText: snippet.insertText,
                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range: range,
-                    detail: 'snippet',
+                    detail: '📝 snippet',
                     documentation: snippet.docs,
                 });
             });
 
             return { suggestions };
         },
+        triggerCharacters: ['.', ' '],
     });
 }
