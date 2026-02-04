@@ -940,6 +940,920 @@ print(fibonacci(10))`,
         estimatedTime: '12 min',
         status: 'available',
     },
+    // Python Fundamentals - Additional
+    {
+        id: 'file-io',
+        courseId: 'python-fundamentals',
+        title: 'File Input/Output',
+        description: 'Read from and write to files.',
+        instructions: `# File I/O
+
+Python makes working with files easy using the \`open()\` function.
+
+## Reading a File
+\`\`\`python
+with open('file.txt', 'r') as f:
+    content = f.read()
+\`\`\`
+
+## Writing to a File
+\`\`\`python
+with open('file.txt', 'w') as f:
+    f.write('Hello!')
+\`\`\`
+
+## Your Task
+Complete the function that counts words in a text.
+Count how many words are in: "Hello world this is Python"`,
+        difficulty: 'beginner',
+        points: 20,
+        starterCode: `def count_words(text):
+    # Your code here
+    pass
+
+# Test
+text = "Hello world this is Python"
+print(count_words(text))`,
+        solution: `def count_words(text):
+    return len(text.split())
+
+# Test
+text = "Hello world this is Python"
+print(count_words(text))`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: '5', description: 'Word count correct', isHidden: false }
+        ],
+        hints: [
+            'Use .split() to break text into words',
+            'Use len() to count items in a list',
+            'split() with no argument splits on whitespace'
+        ],
+        tags: ['files', 'strings', 'basics'],
+        order: 15,
+        estimatedTime: '8 min',
+        status: 'available',
+    },
+    {
+        id: 'lambda-functions',
+        courseId: 'python-fundamentals',
+        title: 'Lambda Functions',
+        description: 'Create anonymous functions with lambda.',
+        instructions: `# Lambda Functions
+
+Lambda functions are small, anonymous functions.
+
+## Syntax
+\`\`\`python
+lambda arguments: expression
+\`\`\`
+
+## Example
+\`\`\`python
+square = lambda x: x ** 2
+print(square(5))  # 25
+\`\`\`
+
+## Your Task
+Use lambda and \`sorted()\` to sort a list of tuples by the second element.
+
+Input: [(1, 3), (2, 1), (3, 2)]
+Output: [(2, 1), (3, 2), (1, 3)]`,
+        difficulty: 'intermediate',
+        points: 25,
+        starterCode: `# Sort by the second element of each tuple
+data = [(1, 3), (2, 1), (3, 2)]
+
+# Use sorted() with a lambda key
+sorted_data = sorted(data, key=)
+
+print(sorted_data)`,
+        solution: `# Sort by the second element of each tuple
+data = [(1, 3), (2, 1), (3, 2)]
+
+# Use sorted() with a lambda key
+sorted_data = sorted(data, key=lambda x: x[1])
+
+print(sorted_data)`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: '[(2, 1), (3, 2), (1, 3)]', description: 'Sorted by second element', isHidden: false }
+        ],
+        hints: [
+            'lambda x: x[1] gets the second element',
+            'sorted() takes a key parameter',
+            'x[1] accesses index 1 (second item)'
+        ],
+        tags: ['lambda', 'sorting', 'functions'],
+        order: 16,
+        estimatedTime: '10 min',
+        status: 'available',
+    },
+    // OOP Python Course Exercises
+    {
+        id: 'class-inheritance',
+        courseId: 'oop-python',
+        title: 'Class Inheritance',
+        description: 'Create child classes that inherit from parents.',
+        instructions: `# Inheritance
+
+Child classes inherit attributes and methods from parent classes.
+
+## Syntax
+\`\`\`python
+class Child(Parent):
+    def __init__(self):
+        super().__init__()
+\`\`\`
+
+## Your Task
+Create an \`Animal\` parent class with a \`speak()\` method.
+Then create \`Dog\` and \`Cat\` child classes that override \`speak()\`.`,
+        difficulty: 'intermediate',
+        points: 30,
+        starterCode: `class Animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        pass
+
+class Dog(Animal):
+    # Override speak
+    pass
+
+class Cat(Animal):
+    # Override speak
+    pass
+
+# Test
+dog = Dog("Buddy")
+cat = Cat("Whiskers")
+print(dog.speak())
+print(cat.speak())`,
+        solution: `class Animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        return "Some sound"
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name} says Woof!"
+
+class Cat(Animal):
+    def speak(self):
+        return f"{self.name} says Meow!"
+
+# Test
+dog = Dog("Buddy")
+cat = Cat("Whiskers")
+print(dog.speak())
+print(cat.speak())`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: 'Buddy says Woof!\nWhiskers says Meow!', description: 'Inheritance works correctly', isHidden: false }
+        ],
+        hints: [
+            'Override speak() in child classes',
+            'Use self.name from the parent',
+            'Each animal should return its own sound'
+        ],
+        tags: ['oop', 'inheritance', 'classes'],
+        order: 2,
+        estimatedTime: '12 min',
+        status: 'available',
+    },
+    {
+        id: 'magic-methods',
+        courseId: 'oop-python',
+        title: 'Magic Methods',
+        description: 'Customize object behavior with dunder methods.',
+        instructions: `# Magic Methods
+
+Magic methods (dunder methods) customize object behavior.
+
+## Common Magic Methods
+- \`__str__\`: String representation
+- \`__len__\`: Length of object
+- \`__add__\`: Addition operator
+
+## Your Task
+Create a \`Vector\` class that supports:
+- String representation: "Vector(x, y)"
+- Addition: v1 + v2 returns a new Vector`,
+        difficulty: 'intermediate',
+        points: 35,
+        starterCode: `class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    
+    def __str__(self):
+        # Return "Vector(x, y)"
+        pass
+    
+    def __add__(self, other):
+        # Return new Vector with added components
+        pass
+
+# Test
+v1 = Vector(2, 3)
+v2 = Vector(4, 1)
+print(v1)
+print(v1 + v2)`,
+        solution: `class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    
+    def __str__(self):
+        return f"Vector({self.x}, {self.y})"
+    
+    def __add__(self, other):
+        return Vector(self.x + other.x, self.y + other.y)
+
+# Test
+v1 = Vector(2, 3)
+v2 = Vector(4, 1)
+print(v1)
+print(v1 + v2)`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: 'Vector(2, 3)\nVector(6, 4)', description: 'Magic methods work correctly', isHidden: false }
+        ],
+        hints: [
+            '__str__ should return formatted string',
+            '__add__ receives other as parameter',
+            'Create and return a new Vector in __add__'
+        ],
+        tags: ['oop', 'magic-methods', 'operators'],
+        order: 3,
+        estimatedTime: '15 min',
+        status: 'available',
+    },
+    {
+        id: 'property-decorators',
+        courseId: 'oop-python',
+        title: 'Property Decorators',
+        description: 'Use @property for getters and setters.',
+        instructions: `# Property Decorators
+
+The @property decorator creates managed attributes.
+
+## Syntax
+\`\`\`python
+class Circle:
+    @property
+    def area(self):
+        return 3.14 * self.radius ** 2
+\`\`\`
+
+## Your Task
+Create a \`Rectangle\` class with:
+- width and height attributes
+- area property (read-only)
+- perimeter property (read-only)`,
+        difficulty: 'intermediate',
+        points: 30,
+        starterCode: `class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    
+    @property
+    def area(self):
+        # Return width * height
+        pass
+    
+    @property
+    def perimeter(self):
+        # Return 2 * (width + height)
+        pass
+
+# Test
+rect = Rectangle(5, 3)
+print(rect.area)
+print(rect.perimeter)`,
+        solution: `class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    
+    @property
+    def area(self):
+        return self.width * self.height
+    
+    @property
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+# Test
+rect = Rectangle(5, 3)
+print(rect.area)
+print(rect.perimeter)`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: '15\n16', description: 'Properties calculated correctly', isHidden: false }
+        ],
+        hints: [
+            '@property makes a method act like an attribute',
+            'Area = width × height',
+            'Perimeter = 2 × (width + height)'
+        ],
+        tags: ['oop', 'properties', 'decorators'],
+        order: 4,
+        estimatedTime: '10 min',
+        status: 'available',
+    },
+    {
+        id: 'static-class-methods',
+        courseId: 'oop-python',
+        title: 'Static & Class Methods',
+        description: 'Learn @staticmethod and @classmethod.',
+        instructions: `# Static and Class Methods
+
+## @staticmethod
+No access to instance or class. Just a function in a class.
+
+## @classmethod
+Receives the class (cls) as first argument. Can modify class state.
+
+## Your Task
+Create a \`Counter\` class with:
+- A class variable \`count\` tracking instances
+- A @classmethod \`get_count()\` returning total instances
+- A @staticmethod \`is_valid(n)\` checking if n > 0`,
+        difficulty: 'intermediate',
+        points: 30,
+        starterCode: `class Counter:
+    count = 0
+    
+    def __init__(self):
+        Counter.count += 1
+    
+    @classmethod
+    def get_count(cls):
+        # Return the count
+        pass
+    
+    @staticmethod
+    def is_valid(n):
+        # Return True if n > 0
+        pass
+
+# Test
+c1 = Counter()
+c2 = Counter()
+c3 = Counter()
+print(Counter.get_count())
+print(Counter.is_valid(5))
+print(Counter.is_valid(-1))`,
+        solution: `class Counter:
+    count = 0
+    
+    def __init__(self):
+        Counter.count += 1
+    
+    @classmethod
+    def get_count(cls):
+        return cls.count
+    
+    @staticmethod
+    def is_valid(n):
+        return n > 0
+
+# Test
+c1 = Counter()
+c2 = Counter()
+c3 = Counter()
+print(Counter.get_count())
+print(Counter.is_valid(5))
+print(Counter.is_valid(-1))`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: '3\nTrue\nFalse', description: 'Static and class methods work', isHidden: false }
+        ],
+        hints: [
+            '@classmethod uses cls to access class variables',
+            '@staticmethod is like a regular function',
+            'Return cls.count in get_count'
+        ],
+        tags: ['oop', 'static', 'classmethod'],
+        order: 5,
+        estimatedTime: '12 min',
+        status: 'available',
+    },
+    {
+        id: 'dataclasses',
+        courseId: 'oop-python',
+        title: 'Dataclasses',
+        description: 'Simplify class creation with @dataclass.',
+        instructions: `# Dataclasses
+
+The @dataclass decorator auto-generates __init__, __repr__, etc.
+
+## Syntax
+\`\`\`python
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: int
+    y: int
+\`\`\`
+
+## Your Task
+Create a \`Product\` dataclass with:
+- name: str
+- price: float
+- quantity: int = 0 (default)
+
+Print two products.`,
+        difficulty: 'intermediate',
+        points: 25,
+        starterCode: `from dataclasses import dataclass
+
+@dataclass
+class Product:
+    # Define fields here
+    pass
+
+# Test
+p1 = Product("Laptop", 999.99, 5)
+p2 = Product("Mouse", 29.99)
+print(p1)
+print(p2)`,
+        solution: `from dataclasses import dataclass
+
+@dataclass
+class Product:
+    name: str
+    price: float
+    quantity: int = 0
+
+# Test
+p1 = Product("Laptop", 999.99, 5)
+p2 = Product("Mouse", 29.99)
+print(p1)
+print(p2)`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: "Product(name='Laptop', price=999.99, quantity=5)\nProduct(name='Mouse', price=29.99, quantity=0)", description: 'Dataclass works correctly', isHidden: false }
+        ],
+        hints: [
+            'Use type hints: name: str',
+            'Default values go after the colon: quantity: int = 0',
+            'Fields with defaults must come after required fields'
+        ],
+        tags: ['oop', 'dataclass', 'modern-python'],
+        order: 6,
+        estimatedTime: '8 min',
+        status: 'available',
+    },
+    // Data Analysis Exercises
+    {
+        id: 'list-statistics',
+        courseId: 'data-analysis-pandas',
+        title: 'Basic Statistics',
+        description: 'Calculate mean, median, and mode.',
+        instructions: `# Basic Statistics
+
+Calculate common statistics from a list of numbers.
+
+## Your Task
+Create functions to calculate:
+1. Mean (average)
+2. Median (middle value)
+3. Mode (most frequent)
+
+Test with: [1, 2, 2, 3, 4, 4, 4, 5]`,
+        difficulty: 'intermediate',
+        points: 30,
+        starterCode: `def mean(numbers):
+    # Return average
+    pass
+
+def median(numbers):
+    # Return middle value
+    pass
+
+def mode(numbers):
+    # Return most frequent
+    pass
+
+# Test
+data = [1, 2, 2, 3, 4, 4, 4, 5]
+print(mean(data))
+print(median(data))
+print(mode(data))`,
+        solution: `def mean(numbers):
+    return sum(numbers) / len(numbers)
+
+def median(numbers):
+    sorted_nums = sorted(numbers)
+    n = len(sorted_nums)
+    mid = n // 2
+    if n % 2 == 0:
+        return (sorted_nums[mid-1] + sorted_nums[mid]) / 2
+    return sorted_nums[mid]
+
+def mode(numbers):
+    counts = {}
+    for n in numbers:
+        counts[n] = counts.get(n, 0) + 1
+    return max(counts, key=counts.get)
+
+# Test
+data = [1, 2, 2, 3, 4, 4, 4, 5]
+print(mean(data))
+print(median(data))
+print(mode(data))`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: '3.125\n3.5\n4', description: 'Statistics calculated correctly', isHidden: false }
+        ],
+        hints: [
+            'Mean = sum / count',
+            'Median: sort first, then find middle',
+            'Mode: count occurrences, find max'
+        ],
+        tags: ['statistics', 'data', 'math'],
+        order: 1,
+        estimatedTime: '15 min',
+        status: 'available',
+    },
+    {
+        id: 'data-filtering',
+        courseId: 'data-analysis-pandas',
+        title: 'Data Filtering',
+        description: 'Filter data based on conditions.',
+        instructions: `# Data Filtering
+
+Filter lists of dictionaries based on conditions.
+
+## Your Task
+Given a list of student records, filter to find:
+1. Students with grade >= 80
+2. Students in "Math" class
+
+Return the filtered lists.`,
+        difficulty: 'intermediate',
+        points: 25,
+        starterCode: `students = [
+    {"name": "Alice", "grade": 85, "class": "Math"},
+    {"name": "Bob", "grade": 72, "class": "Science"},
+    {"name": "Charlie", "grade": 90, "class": "Math"},
+    {"name": "Diana", "grade": 78, "class": "English"},
+]
+
+# Filter students with grade >= 80
+high_achievers = []
+
+# Filter students in Math class
+math_students = []
+
+print([s["name"] for s in high_achievers])
+print([s["name"] for s in math_students])`,
+        solution: `students = [
+    {"name": "Alice", "grade": 85, "class": "Math"},
+    {"name": "Bob", "grade": 72, "class": "Science"},
+    {"name": "Charlie", "grade": 90, "class": "Math"},
+    {"name": "Diana", "grade": 78, "class": "English"},
+]
+
+# Filter students with grade >= 80
+high_achievers = [s for s in students if s["grade"] >= 80]
+
+# Filter students in Math class
+math_students = [s for s in students if s["class"] == "Math"]
+
+print([s["name"] for s in high_achievers])
+print([s["name"] for s in math_students])`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: "['Alice', 'Charlie']\n['Alice', 'Charlie']", description: 'Filtering works correctly', isHidden: false }
+        ],
+        hints: [
+            'Use list comprehension with if condition',
+            'Access dictionary values with s["key"]',
+            'Comparison operators: >=, =='
+        ],
+        tags: ['filtering', 'data', 'comprehensions'],
+        order: 2,
+        estimatedTime: '10 min',
+        status: 'available',
+    },
+    {
+        id: 'data-grouping',
+        courseId: 'data-analysis-pandas',
+        title: 'Group By Operations',
+        description: 'Group data and calculate aggregates.',
+        instructions: `# Group By
+
+Group data by a category and calculate aggregates.
+
+## Your Task
+Group sales data by product category and calculate:
+1. Total sales per category
+2. Average sale per category`,
+        difficulty: 'intermediate',
+        points: 30,
+        starterCode: `sales = [
+    {"product": "Laptop", "category": "Electronics", "amount": 1000},
+    {"product": "Phone", "category": "Electronics", "amount": 500},
+    {"product": "Desk", "category": "Furniture", "amount": 300},
+    {"product": "Chair", "category": "Furniture", "amount": 150},
+    {"product": "Monitor", "category": "Electronics", "amount": 400},
+]
+
+# Group by category and sum amounts
+totals = {}
+# Your code here
+
+for cat, total in sorted(totals.items()):
+    print(f"{cat}: {total}")`,
+        solution: `sales = [
+    {"product": "Laptop", "category": "Electronics", "amount": 1000},
+    {"product": "Phone", "category": "Electronics", "amount": 500},
+    {"product": "Desk", "category": "Furniture", "amount": 300},
+    {"product": "Chair", "category": "Furniture", "amount": 150},
+    {"product": "Monitor", "category": "Electronics", "amount": 400},
+]
+
+# Group by category and sum amounts
+totals = {}
+for sale in sales:
+    cat = sale["category"]
+    totals[cat] = totals.get(cat, 0) + sale["amount"]
+
+for cat, total in sorted(totals.items()):
+    print(f"{cat}: {total}")`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: 'Electronics: 1900\nFurniture: 450', description: 'Grouping works correctly', isHidden: false }
+        ],
+        hints: [
+            'Loop through sales',
+            'Use dict.get(key, 0) for safe access',
+            'Accumulate amounts per category'
+        ],
+        tags: ['groupby', 'aggregation', 'data'],
+        order: 3,
+        estimatedTime: '12 min',
+        status: 'available',
+    },
+    // Python Automation Exercises
+    {
+        id: 'list-files',
+        courseId: 'python-automation',
+        title: 'List Directory Contents',
+        description: 'Work with file system operations.',
+        instructions: `# File System Operations
+
+Python's os module provides file system utilities.
+
+## Your Task
+Given a list of filenames, filter to find:
+1. All .py files
+2. All .txt files
+
+Use string methods to check extensions.`,
+        difficulty: 'beginner',
+        points: 20,
+        starterCode: `files = [
+    "main.py",
+    "data.txt",
+    "utils.py",
+    "readme.md",
+    "config.json",
+    "test.py",
+    "notes.txt"
+]
+
+# Filter Python files
+py_files = []
+
+# Filter text files
+txt_files = []
+
+print("Python files:", py_files)
+print("Text files:", txt_files)`,
+        solution: `files = [
+    "main.py",
+    "data.txt",
+    "utils.py",
+    "readme.md",
+    "config.json",
+    "test.py",
+    "notes.txt"
+]
+
+# Filter Python files
+py_files = [f for f in files if f.endswith(".py")]
+
+# Filter text files
+txt_files = [f for f in files if f.endswith(".txt")]
+
+print("Python files:", py_files)
+print("Text files:", txt_files)`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: "Python files: ['main.py', 'utils.py', 'test.py']\nText files: ['data.txt', 'notes.txt']", description: 'Files filtered correctly', isHidden: false }
+        ],
+        hints: [
+            'Use .endswith() to check file extension',
+            'List comprehension makes filtering easy',
+            '.endswith(".py") checks for Python files'
+        ],
+        tags: ['files', 'automation', 'strings'],
+        order: 1,
+        estimatedTime: '8 min',
+        status: 'available',
+    },
+    {
+        id: 'batch-rename',
+        courseId: 'python-automation',
+        title: 'Batch Rename Files',
+        description: 'Generate new filenames for batch operations.',
+        instructions: `# Batch Rename
+
+Create a function to generate new filenames with a prefix and numbering.
+
+## Example
+prefix="report", count=3
+Output: ["report_001.txt", "report_002.txt", "report_003.txt"]`,
+        difficulty: 'beginner',
+        points: 20,
+        starterCode: `def batch_rename(prefix, count, extension="txt"):
+    # Generate list of new filenames
+    # Format: prefix_001.extension
+    pass
+
+# Test
+files = batch_rename("report", 5)
+for f in files:
+    print(f)`,
+        solution: `def batch_rename(prefix, count, extension="txt"):
+    return [f"{prefix}_{i:03d}.{extension}" for i in range(1, count + 1)]
+
+# Test
+files = batch_rename("report", 5)
+for f in files:
+    print(f)`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: 'report_001.txt\nreport_002.txt\nreport_003.txt\nreport_004.txt\nreport_005.txt', description: 'Batch rename works correctly', isHidden: false }
+        ],
+        hints: [
+            'Use f-string formatting: {i:03d} for 3-digit padding',
+            'range(1, count + 1) gives 1 to count',
+            'List comprehension creates the list'
+        ],
+        tags: ['automation', 'strings', 'formatting'],
+        order: 2,
+        estimatedTime: '10 min',
+        status: 'available',
+    },
+    // Testing Exercises
+    {
+        id: 'assert-basics',
+        courseId: 'testing-pytest',
+        title: 'Assert Statements',
+        description: 'Use assert for basic testing.',
+        instructions: `# Assert Statements
+
+Assert statements verify conditions during testing.
+
+## Syntax
+\`\`\`python
+assert condition, "Error message"
+\`\`\`
+
+## Your Task
+Create a function \`validate_age(age)\` that:
+- Returns True if age is between 0 and 120
+- Returns False otherwise
+
+Then write asserts to test it.`,
+        difficulty: 'beginner',
+        points: 20,
+        starterCode: `def validate_age(age):
+    # Return True if age is valid (0-120)
+    pass
+
+# Test with asserts
+assert validate_age(25) == True
+assert validate_age(-5) == False
+assert validate_age(150) == False
+assert validate_age(0) == True
+assert validate_age(120) == True
+
+print("All tests passed!")`,
+        solution: `def validate_age(age):
+    return 0 <= age <= 120
+
+# Test with asserts
+assert validate_age(25) == True
+assert validate_age(-5) == False
+assert validate_age(150) == False
+assert validate_age(0) == True
+assert validate_age(120) == True
+
+print("All tests passed!")`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: 'All tests passed!', description: 'All assertions pass', isHidden: false }
+        ],
+        hints: [
+            'Use chained comparison: 0 <= age <= 120',
+            'Return a boolean expression',
+            'Asserts fail if condition is False'
+        ],
+        tags: ['testing', 'assert', 'validation'],
+        order: 1,
+        estimatedTime: '8 min',
+        status: 'available',
+    },
+    {
+        id: 'test-functions',
+        courseId: 'testing-pytest',
+        title: 'Writing Test Functions',
+        description: 'Structure tests as functions.',
+        instructions: `# Test Functions
+
+Organize tests as functions with descriptive names.
+
+## Convention
+\`\`\`python
+def test_function_name():
+    # Arrange
+    # Act
+    # Assert
+\`\`\`
+
+## Your Task
+Write test functions for a \`Calculator\` class.`,
+        difficulty: 'intermediate',
+        points: 25,
+        starterCode: `class Calculator:
+    def add(self, a, b):
+        return a + b
+    
+    def subtract(self, a, b):
+        return a - b
+    
+    def multiply(self, a, b):
+        return a * b
+
+def test_add():
+    # Test the add method
+    pass
+
+def test_subtract():
+    # Test the subtract method
+    pass
+
+def test_multiply():
+    # Test the multiply method
+    pass
+
+# Run tests
+test_add()
+test_subtract()
+test_multiply()
+print("All tests passed!")`,
+        solution: `class Calculator:
+    def add(self, a, b):
+        return a + b
+    
+    def subtract(self, a, b):
+        return a - b
+    
+    def multiply(self, a, b):
+        return a * b
+
+def test_add():
+    calc = Calculator()
+    assert calc.add(2, 3) == 5
+    assert calc.add(-1, 1) == 0
+
+def test_subtract():
+    calc = Calculator()
+    assert calc.subtract(5, 3) == 2
+    assert calc.subtract(0, 5) == -5
+
+def test_multiply():
+    calc = Calculator()
+    assert calc.multiply(3, 4) == 12
+    assert calc.multiply(-2, 3) == -6
+
+# Run tests
+test_add()
+test_subtract()
+test_multiply()
+print("All tests passed!")`,
+        testCases: [
+            { id: '1', input: '', expectedOutput: 'All tests passed!', description: 'All test functions pass', isHidden: false }
+        ],
+        hints: [
+            'Create a Calculator instance in each test',
+            'Use assert to check expected vs actual',
+            'Test edge cases like negatives and zero'
+        ],
+        tags: ['testing', 'functions', 'classes'],
+        order: 2,
+        estimatedTime: '12 min',
+        status: 'available',
+    },
 ];
 
 // Helper function to get exercises by course
