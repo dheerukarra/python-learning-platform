@@ -7,14 +7,15 @@ import {
     Eye,
     EyeOff,
     ArrowRight,
-    Chrome
+    Chrome,
+    AlertCircle
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import './AuthPages.css';
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuthStore();
+    const { loginWithCredentials, error: authError, setError } = useAuthStore();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
@@ -22,32 +23,25 @@ const LoginPage = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setLocalError(null);
+        setError(null);
 
-        // Simulate login
-        setTimeout(() => {
-            login({
-                id: '1',
-                email: formData.email,
-                username: formData.email.split('@')[0],
-                displayName: 'Demo User',
-                role: 'student',
-                createdAt: new Date().toISOString(),
-                stats: {
-                    totalPoints: 2450,
-                    exercisesCompleted: 47,
-                    currentStreak: 12,
-                    longestStreak: 21,
-                    rank: 156,
-                    badges: []
-                }
-            }, 'demo-token');
+        const success = await loginWithCredentials(formData.email, formData.password);
+
+        setIsLoading(false);
+
+        if (success) {
             navigate('/dashboard');
-        }, 1000);
+        } else {
+            setLocalError(authError || 'Login failed. Please check your credentials.');
+        }
     };
+
 
     const handleOAuthLogin = async (provider: 'google' | 'github') => {
         setOauthLoading(provider);
@@ -115,6 +109,14 @@ const LoginPage = () => {
                 {/* Right Panel - Form */}
                 <div className="auth-form-container">
                     <div className="auth-form-content">
+                        {/* Error Alert */}
+                        {(localError || authError) && (
+                            <div className="auth-error-alert">
+                                <AlertCircle size={18} />
+                                <span>{localError || authError}</span>
+                            </div>
+                        )}
+
                         <h2 className="form-title">Sign in to your account</h2>
                         <p className="form-subtitle">
                             Don't have an account?{' '}

@@ -9,14 +9,15 @@ import {
     EyeOff,
     ArrowRight,
     Chrome,
-    Check
+    Check,
+    AlertCircle
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import './AuthPages.css';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuthStore();
+    const { registerWithCredentials, error: authError } = useAuthStore();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -36,26 +37,19 @@ const RegisterPage = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate registration
-        setTimeout(() => {
-            login({
-                id: '1',
-                email: formData.email,
-                username: formData.email.split('@')[0],
-                displayName: formData.name,
-                role: 'student',
-                createdAt: new Date().toISOString(),
-                stats: {
-                    totalPoints: 0,
-                    exercisesCompleted: 0,
-                    currentStreak: 0,
-                    longestStreak: 0,
-                    rank: 0,
-                    badges: []
-                }
-            }, 'demo-token');
+        const success = await registerWithCredentials(
+            formData.email,
+            formData.email.split('@')[0], // Use email prefix as username
+            formData.password,
+            formData.name
+        );
+
+        setIsLoading(false);
+
+        if (success) {
             navigate('/dashboard');
-        }, 1000);
+        }
+        // Error will be displayed via authStore.error
     };
 
     const handleOAuthSignup = async (provider: 'google' | 'github') => {
@@ -128,6 +122,14 @@ const RegisterPage = () => {
                 {/* Right Panel - Form */}
                 <div className="auth-form-container">
                     <div className="auth-form-content">
+                        {/* Error Alert */}
+                        {authError && (
+                            <div className="auth-error-alert">
+                                <AlertCircle size={18} />
+                                <span>{authError}</span>
+                            </div>
+                        )}
+
                         <h2 className="form-title">Create your free account</h2>
                         <p className="form-subtitle">
                             Already have an account?{' '}

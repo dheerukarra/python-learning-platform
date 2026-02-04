@@ -1,3 +1,51 @@
+/* Auth Error Alert */
+.auth-error-alert {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-4);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    color: #dc2626;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-4);
+}
+
+.auth-error-alert svg {
+    flex-shrink: 0;
+}
+
+/* Auth Callback Loading */
+.auth-callback-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: var(--spacing-4);
+}
+
+.callback-loading,
+.callback-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+    text-align: center;
+}
+
+.callback-loading p,
+.callback-error p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+}
+
+.spinner-icon {
+    color: var(--color-primary);
+    animation: spin 1s linear infinite;
+}
+
 .auth-page {
     min-height: 100vh;
     display: flex;
