@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime
 
+from config import settings
 from database import get_db
 from models.user import User
 from auth.jwt import (
@@ -11,6 +13,12 @@ from auth.jwt import (
     get_current_user
 )
 from auth.schemas import UserRegister, UserLogin, TokenResponse
+from auth.oauth import (
+    get_google_auth_url,
+    get_github_auth_url,
+    get_google_user_info,
+    get_github_user_info
+)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -89,40 +97,154 @@ async def get_me(current_user: User = Depends(get_current_user)):
     """Get current authenticated user."""
     return current_user.to_dict()
 
-@router.post("/demo/{provider}", response_model=TokenResponse)
-async def demo_oauth_login(provider: str, db: Session = Depends(get_db)):
-    """Demo OAuth login (simulated for development)."""
-    if provider not in ["google", "github"]:
+# ==================== GOOGLE OAUTH ====================
+
+@router.get("/google")
+async def google_auth():
+    """Redirect to Google OAuth."""
+    if not settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth not configured"
+        )
+    return RedirectResponse(url=get_google_auth_url())
+
+@router.get("/google/callback")
+async def google_callback(code: str, db: Session = Depends(get_db)):
+    """Handle Google OAuth callback."""
+    user_info = await get_google_user_info(code)
+    
+    if not user_info or not user_info.get("email"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid provider"
+            detail="Failed to get user info from Google"
         )
     
-    # Create or get demo user for this provider
-    demo_email = f"demo_{provider}@pylearn.dev"
-    user = db.query(User).filter(User.email == demo_email).first()
+    # Find or create user
+    user = db.query(User).filter(User.email == user_info["email"]).first()
     
     if not user:
+        # Create new user
+        username = user_info["email"].split("@")[0]
+        # Ensure unique username
+        base_username = username
+        counter = 1
+        while db.query(User).filter(User.username == username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
         user = User(
-            email=demo_email,
-            username=f"{provider}_user",
-            display_name=f"{provider.title()} User",
-            oauth_provider=provider,
-            oauth_id=f"demo-{provider}-123",
-            avatar=f"https://ui-avatars.com/api/?name={provider.title()}+User&background={'4285F4' if provider == 'google' else '333'}&color=fff",
-            total_points=500,
-            exercises_completed=10,
-            current_streak=3,
-            longest_streak=7
+            email=user_info["email"],
+            username=username,
+            display_name=user_info.get("name", username),
+            avatar=user_info.get("picture"),
+            oauth_provider="google",
+            oauth_id=user_info.get("id"),
+            total_points=0,
+            exercises_completed=0,
+            current_streak=0,
+            longest_streak=0
         )
         db.add(user)
         db.commit()
         db.refresh(user)
+    else:
+        # Update existing user
+        user.last_login = datetime.utcnow()
+        if user_info.get("picture") and not user.avatar:
+            user.avatar = user_info["picture"]
+        db.commit()
     
     # Create token
     access_token = create_access_token(data={"sub": user.id})
     
-    return TokenResponse(
-        access_token=access_token,
-        user=user.to_dict()
-    )
+    # Redirect to frontend with token
+    frontend_url = settings.FRONTEND_URL
+    return RedirectResponse(url=f"{frontend_url}/auth/callback?token={access_token}")
+
+# ==================== GITHUB OAUTH ====================
+
+@router.get("/github")
+async def github_auth():
+    """Redirect to GitHub OAuth."""
+    if not settings.GITHUB_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="GitHub OAuth not configured"
+        )
+    return RedirectResponse(url=get_github_auth_url())
+
+@router.get("/github/callback")
+async def github_callback(code: str, db: Session = Depends(get_db)):
+    """Handle GitHub OAuth callback."""
+    user_info = await get_github_user_info(code)
+    
+    if not user_info or not user_info.get("email"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to get user info from GitHub"
+        )
+    
+    # Find or create user
+    user = db.query(User).filter(User.email == user_info["email"]).first()
+    
+    if not user:
+        # Create new user
+        username = user_info.get("username") or user_info["email"].split("@")[0]
+        # Ensure unique username
+        base_username = username
+        counter = 1
+        while db.query(User).filter(User.username == username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        user = User(
+            email=user_info["email"],
+            username=username,
+            display_name=user_info.get("name", username),
+            avatar=user_info.get("picture"),
+            oauth_provider="github",
+            oauth_id=user_info.get("id"),
+            total_points=0,
+            exercises_completed=0,
+            current_streak=0,
+            longest_streak=0
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        # Update existing user
+        user.last_login = datetime.utcnow()
+        if user_info.get("picture") and not user.avatar:
+            user.avatar = user_info["picture"]
+        db.commit()
+    
+    # Create token
+    access_token = create_access_token(data={"sub": user.id})
+    
+    # Redirect to frontend with token
+    frontend_url = settings.FRONTEND_URL
+    return RedirectResponse(url=f"{frontend_url}/auth/callback?token={access_token}")
+
+# ==================== OAuth URL Endpoints (for frontend) ====================
+
+@router.get("/google/url")
+async def get_google_url():
+    """Get Google OAuth URL for frontend redirect."""
+    if not settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth not configured"
+        )
+    return {"url": get_google_auth_url()}
+
+@router.get("/github/url")
+async def get_github_url():
+    """Get GitHub OAuth URL for frontend redirect."""
+    if not settings.GITHUB_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="GitHub OAuth not configured"
+        )
+    return {"url": get_github_auth_url()}

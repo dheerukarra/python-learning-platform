@@ -49,45 +49,32 @@ const LoginPage = () => {
         }, 1000);
     };
 
-    const handleOAuthLogin = (provider: 'google' | 'github') => {
+    const handleOAuthLogin = async (provider: 'google' | 'github') => {
         setOauthLoading(provider);
 
-        // Simulate OAuth login flow
-        setTimeout(() => {
-            const mockUser = provider === 'google'
-                ? {
-                    id: 'google-123',
-                    email: 'user@gmail.com',
-                    username: 'google_user',
-                    displayName: 'Google User',
-                    avatar: 'https://ui-avatars.com/api/?name=Google+User&background=4285F4&color=fff',
-                }
-                : {
-                    id: 'github-456',
-                    email: 'user@github.com',
-                    username: 'github_user',
-                    displayName: 'GitHub User',
-                    avatar: 'https://ui-avatars.com/api/?name=GitHub+User&background=333&color=fff',
-                };
+        try {
+            // Get OAuth URL from backend and redirect
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${API_URL}/auth/${provider}/url`);
 
-            login({
-                ...mockUser,
-                role: 'student',
-                createdAt: new Date().toISOString(),
-                stats: {
-                    totalPoints: 1200,
-                    exercisesCompleted: 25,
-                    currentStreak: 5,
-                    longestStreak: 10,
-                    rank: 320,
-                    badges: []
-                }
-            }, `${provider}-demo-token`);
+            if (!response.ok) {
+                // If backend is not available, show error
+                const errorData = await response.json();
+                alert(errorData.detail || `${provider} OAuth is not configured. Please set up OAuth credentials in the backend.`);
+                setOauthLoading(null);
+                return;
+            }
 
+            const { url } = await response.json();
+            // Redirect to OAuth provider
+            window.location.href = url;
+        } catch (error) {
+            console.error('OAuth error:', error);
+            alert(`Failed to connect to authentication server. Please ensure the backend is running.`);
             setOauthLoading(null);
-            navigate('/dashboard');
-        }, 1500);
+        }
     };
+
 
     return (
         <div className="auth-page">
